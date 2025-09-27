@@ -4,5 +4,5 @@ INTEGRANTES:
 - Cedamanos Guevara,Julio
 - Gutierrez Rubio, Bryam
 - Flores Alvarez, Rodrigo
-- Rios Marvin
+- Rios, Marvin
 - Ibañez Herrera, Luis
