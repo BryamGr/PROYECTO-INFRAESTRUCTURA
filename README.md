@@ -5,3 +5,4 @@ INTEGRANTES:
 - Gutierrez Rubio, Bryam
 - Flores Alvarez, Rodrigo
 - Marvin Rios
+- Ibañez Herrera, Luis
