@@ -8,8 +8,8 @@ window.onload = function() {
     }
     
     const poolData = {
-        UserPoolId: 'us-east-2_tMrodja4K',
-        ClientId: '1a73vcf7enqc5ibrup6lat3r1d'
+        UserPoolId: 'us-east-2_LZM828aOx',
+        ClientId: '6t1j1pprlaiuo86s2tp9p3g7ms'
     };
 
     const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
