@@ -1,4 +1,4 @@
-// auth.js - VERSIÓN CORREGIDA
+// auth.js - VERSIÓN CON REDIRECCIÓN
 window.onload = function() {
     // Verifica que Cognito esté cargado
     if (typeof AmazonCognitoIdentity === 'undefined') {
@@ -37,7 +37,14 @@ window.onload = function() {
             onSuccess: result => {
                 const idToken = result.getIdToken().getJwtToken();
                 localStorage.setItem('idToken', idToken);
+                
+                // ✅ MOSTRAR MODAL PERO REDIRIGIR DESPUÉS
                 document.getElementById('successModal').style.display = 'block';
+                
+                // ✅ REDIRECCIÓN AUTOMÁTICA después de 2 segundos
+                setTimeout(() => {
+                    window.location.href = "https://bryamgr.github.io/PROYECTOINFRA.github.io/Dashboard/index.html";
+                }, 2000);
             },
             onFailure: err => {
                 alert('Error: ' + (err.message || JSON.stringify(err)));
@@ -45,11 +52,13 @@ window.onload = function() {
         });
     });
 
-    // Cerrar modal de éxito
+    // Cerrar modal de éxito (pero igual redirigir si cierran)
     const modalClose = document.getElementById('modalClose');
     if (modalClose) {
         modalClose.addEventListener('click', function() {
             document.getElementById('successModal').style.display = 'none';
+            // ✅ REDIRECCIÓN incluso si cierran el modal
+            window.location.href = "https://bryamgr.github.io/PROYECTOINFRA.github.io/Dashboard/index.html";
         });
     }
 };
