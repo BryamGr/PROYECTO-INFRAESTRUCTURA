@@ -1,7 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+// auth.js - VERSIÓN CORREGIDA
+window.onload = function() {
     // Verifica que Cognito esté cargado
     if (typeof AmazonCognitoIdentity === 'undefined') {
         console.error('AmazonCognitoIdentity no está cargado');
+        alert('Error: Recarga la página. Si persiste, verifica la conexión.');
         return;
     }
     
@@ -10,8 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ClientId: '7g6tuctmqp12j2v16ul8crfktm'
     };
 
-        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-
+    const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
     const loginForm = document.getElementById('loginForm');
 
     loginForm.addEventListener('submit', e => {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const userData = {
             Username: email,
-            Pool: userPool  // ✅ Ahora userPool está disponible aquí
+            Pool: userPool
         };
 
         const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
@@ -43,4 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    });
+
+    // Cerrar modal de éxito
+    const modalClose = document.getElementById('modalClose');
+    if (modalClose) {
+        modalClose.addEventListener('click', function() {
+            document.getElementById('successModal').style.display = 'none';
+        });
+    }
+};
