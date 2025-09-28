@@ -41,7 +41,7 @@ window.onload = function() {
                 // ✅ REDIRECCIÓN AUTOMÁTICA después de 2 segundos
                 setTimeout(() => {
                     window.location.href = "https://bryamgr.github.io/PROYECTOINFRA.github.io/Dashboard/index.html";
-                }, 2000);
+                }, 500);
             },
             onFailure: err => {
                 alert('Error: ' + (err.message || JSON.stringify(err)));
