@@ -23,7 +23,7 @@ cognitoidentityserviceprovider.getUser(params, function(err, data) {
     if (err) 
     {
         // Change - Link to the Home Page
-        window.location.href = 'https://github.com/BryamGr/PROYECTOINFRA.github.io.git'
+        window.location.href = 'https://github.com/BryamGr'
     }
     else 
     {
