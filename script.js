@@ -63,21 +63,14 @@ let products = [
         stock: 18,
         expirationDate: "2023-11-25"
     }
-];
+    ];
 
-// Variables globales
-let categoryChart = null;
-
-// Elementos del DOM
+    // Elementos del DOM
     const productModal = document.getElementById('productModal');
     const productForm = document.getElementById('productForm');
     const cancelBtn = document.getElementById('cancelBtn');
     const closeModal = document.querySelector('.close');
 
-// Inicializar la aplicación
-document.addEventListener('DOMContentLoaded', function() {
-initializeCategoryChart();
-    
     // Event listeners
     productForm.addEventListener('submit', handleProductSubmit);
     cancelBtn.addEventListener('click', closeProductModal);
@@ -89,7 +82,6 @@ initializeCategoryChart();
             closeProductModal();
         }
     });
-});
 
 // Función para renderizar la tabla de productos
 function renderProductsTable() {
@@ -114,73 +106,9 @@ function renderProductsTable() {
         `;
         productsTableBody.appendChild(row);
     });
-}
+    }
 
-// Función para inicializar el gráfico de categorías
-function initializeCategoryChart() {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
-    
-    // Calcular datos para el gráfico
-    const categoryData = {
-        'Conservas Saladas': 0,
-        'Pescados y Mariscos': 0,
-        'Salsas': 0,
-        'Aceites': 0,
-        'Legumbres': 0
-    };
-    
-    products.forEach(product => {
-        if (categoryData.hasOwnProperty(product.category)) {
-            categoryData[product.category]++;
-        }
-    });
-    
-    const totalProducts = products.length;
-    const percentages = Object.values(categoryData).map(count => 
-        totalProducts > 0 ? ((count / totalProducts) * 100).toFixed(1) : 0
-    );
-    
-    categoryChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(categoryData),
-            datasets: [{
-                data: Object.values(categoryData),
-                backgroundColor: [
-                    '#4e73df',
-                    '#1cc88a',
-                    '#36b9cc',
-                    '#f6c23e',
-                    '#e74a3b'
-                ],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const percentage = percentages[context.dataIndex];
-                            return `${label}: ${value} productos (${percentage}%)`;
-                        }
-                    }
-                }
-            },
-            cutout: '70%'
-        }
-    });
-}
-
-// Función para manejar el envío del formulario
+    // Función para manejar el envío del formulario
 function handleProductSubmit(e) {
     e.preventDefault();
     
@@ -209,11 +137,10 @@ function handleProductSubmit(e) {
     // Actualizar gráfico
     if (categoryChart) {
         categoryChart.destroy();
-    }
-    initializeCategoryChart();
+        }
     
     // Mostrar mensaje de éxito
-    alert('Producto agregado correctamente');
+    alert('Producto agregado corremente');
 }
 
 // Función para cerrar el modal
@@ -241,8 +168,7 @@ function deleteProduct(id) {
         if (categoryChart) {
             categoryChart.destroy();
         }
-        initializeCategoryChart();
-        
+                
         alert('Producto eliminado correctamente');
     }
 }

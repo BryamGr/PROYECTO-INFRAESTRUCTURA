@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ClientId: '7g6tuctmqp12j2v16ul8crfktm'
     };
 
-    // Mover esta línea aquí
+    // ✅ CORRECTO: Fuera del event listener
     const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 
     const loginForm = document.getElementById('loginForm');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const userData = {
             Username: email,
-            Pool: userPool
+            Pool: userPool  // ✅ Ahora userPool está disponible aquí
         };
 
         const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
@@ -38,4 +38,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-});
+    });
