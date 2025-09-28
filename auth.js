@@ -9,7 +9,7 @@ window.onload = function() {
     
     const poolData = {
         UserPoolId: 'us-east-2_tMrodja4K',
-        ClientId: '7g6tuctmqp12j2v16ul8crfktm'
+        ClientId: '1a73vcf7enqc5ibrup6lat3r1d'
     };
 
     const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
