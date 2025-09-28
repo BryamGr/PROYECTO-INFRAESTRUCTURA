@@ -38,9 +38,6 @@ window.onload = function() {
                 const idToken = result.getIdToken().getJwtToken();
                 localStorage.setItem('idToken', idToken);
                 
-                // ✅ MOSTRAR MODAL PERO REDIRIGIR DESPUÉS
-                document.getElementById('successModal').style.display = 'block';
-                
                 // ✅ REDIRECCIÓN AUTOMÁTICA después de 2 segundos
                 setTimeout(() => {
                     window.location.href = "https://bryamgr.github.io/PROYECTOINFRA.github.io/Dashboard/index.html";
@@ -51,14 +48,4 @@ window.onload = function() {
             }
         });
     });
-
-    // Cerrar modal de éxito (pero igual redirigir si cierran)
-    const modalClose = document.getElementById('modalClose');
-    if (modalClose) {
-        modalClose.addEventListener('click', function() {
-            document.getElementById('successModal').style.display = 'none';
-            // ✅ REDIRECCIÓN incluso si cierran el modal
-            window.location.href = "https://bryamgr.github.io/PROYECTOINFRA.github.io/Dashboard/index.html";
-        });
-    }
-};
+    };
