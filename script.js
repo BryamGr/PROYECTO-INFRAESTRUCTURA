@@ -69,16 +69,14 @@ let products = [
 let categoryChart = null;
 
 // Elementos del DOM
-const productsTableBody = document.getElementById('productsTableBody');
-const productModal = document.getElementById('productModal');
-const productForm = document.getElementById('productForm');
-const cancelBtn = document.getElementById('cancelBtn');
-const closeModal = document.querySelector('.close');
+    const productModal = document.getElementById('productModal');
+    const productForm = document.getElementById('productForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const closeModal = document.querySelector('.close');
 
 // Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', function() {
-    renderProductsTable();
-    initializeCategoryChart();
+initializeCategoryChart();
     
     // Event listeners
     productForm.addEventListener('submit', handleProductSubmit);
@@ -276,9 +274,4 @@ document.querySelectorAll('.btn-action').forEach(button => {
             alert('Mostrando estadísticas del producto');
         }
     });
-});
-
-// Simular funcionalidad de "Talk with Us"
-document.querySelector('.btn-contact').addEventListener('click', function() {
-    alert('Redirigiendo al chat de soporte...');
-});
+    });
