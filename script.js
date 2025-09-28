@@ -11,26 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.querySelector('i').classList.toggle('fa-eye');
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
-    }
-
-    // Cerrar modal de éxito
-    const modalClose = document.getElementById('modalClose');
-    const successModal = document.getElementById('successModal');
-    
-    if (modalClose && successModal) {
-        modalClose.addEventListener('click', function() {
-            successModal.style.display = 'none';
-        });
-    }
-
-    // Cerrar modal al hacer clic fuera
-    window.addEventListener('click', function(event) {
-        if (event.target === successModal) {
-            successModal.style.display = 'none';
         }
-    });
 
-    // Validación básica del formulario
+        // Validación básica del formulario
     const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
