@@ -64,17 +64,6 @@ let products = [
         expirationDate: "2023-11-25"
     }
     ];
-
-    // Elementos del DOM
-    const productModal = document.getElementById('productModal');
-    const productForm = document.getElementById('productForm');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const closeModal = document.querySelector('.close');
-
-    // Event listeners
-    productForm.addEventListener('submit', handleProductSubmit);
-    cancelBtn.addEventListener('click', closeProductModal);
-    closeModal.addEventListener('click', closeProductModal);
     
     // Cerrar modal al hacer clic fuera de él
     window.addEventListener('click', function(event) {

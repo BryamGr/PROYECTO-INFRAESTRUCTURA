@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Verifica que Cognito esté cargado
+    if (typeof AmazonCognitoIdentity === 'undefined') {
+        console.error('AmazonCognitoIdentity no está cargado');
+        return;
+    }
+    
     const poolData = {
         UserPoolId: 'us-east-2_tMrodja4K',
         ClientId: '7g6tuctmqp12j2v16ul8crfktm'
     };
 
-    // ✅ CORRECTO: Fuera del event listener
-    const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 
     const loginForm = document.getElementById('loginForm');
 
