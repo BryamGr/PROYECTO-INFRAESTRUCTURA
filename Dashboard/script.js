@@ -1,65 +1,6 @@
-// Datos de ejemplo para el dashboard
-let inventoryData = {
-    products: [
-        {
-            id: 1,
-            name: "Aceitunas Verdes Rellenas",
-            category: "Conservas Saladas",
-            quantity: 23,
-            unit: "latas",
-            expiry: "2024-12-19",
-            location: "Estante B-2",
-            supplier: "Mediterráneo S.A.",
-            price: 3.25
-        },
-        {
-            id: 2,
-            name: "Atún en Aceite de Oliva",
-            category: "Pescados y Mariscos",
-            quantity: 67,
-            unit: "latas",
-            expiry: "2025-06-14",
-            location: "Estante C-1",
-            supplier: "Pescados del Mar",
-            price: 5.99
-        },
-        {
-            id: 3,
-            name: "Duraznos en Almíbar",
-            category: "Frutas en Conserva",
-            quantity: 42,
-            unit: "latas",
-            expiry: "2025-10-15",
-            location: "Estante A-3",
-            supplier: "Frutas Selectas",
-            price: 4.50
-        },
-        {
-            id: 4,
-            name: "Salsa de Tomate",
-            category: "Salsas",
-            quantity: 35,
-            unit: "frascos",
-            expiry: "2025-08-22",
-            location: "Estante D-1",
-            supplier: "Tomates Premium",
-            price: 2.75
-        },
-        {
-            id: 5,
-            name: "Mermelada de Fresa",
-            category: "Conservas Dulces",
-            quantity: 14,
-            unit: "frascos",
-            expiry: "2025-07-05",
-            location: "Estante A-2",
-            supplier: "Dulces Naturales",
-            price: 3.80
-        }
-    ],
-    categories: ["Pescados y Mariscos", "Conservas Dulces", "Frutas en Conserva", "Conservas Saladas", "Salsas"],
-    monthlyTrend: [150, 165, 180, 172, 181]
-};
+// URLs de la API (actualiza estas URLs cuando despliegues en AWS)
+const INVENTORY_API_BASE = 'http://localhost:3000/api';
+const REPORTS_API_BASE = 'http://localhost:3001/api';
 
 // Variables globales
 let currentPage = 1;
@@ -68,6 +9,7 @@ let currentSort = { column: 'name', direction: 'asc' };
 let filteredProducts = [];
 let productToDelete = null;
 let chartInstances = {};
+let inventoryData = { products: [] };
 
 // Inicialización cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
@@ -76,25 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Inicializar el dashboard
-function initDashboard() {
-    filteredProducts = [...inventoryData.products];
+async function initDashboard() {
+    await loadProductsFromAPI();
     updateSummaryCards();
-    renderCharts();
+    await renderCharts();
     renderProductTable();
     setupSorting();
 }
 
 // Configurar event listeners
 function setupEventListeners() {
-    // Botón para agregar producto
     document.getElementById('addProduct').addEventListener('click', openProductModal);
-    
-    // Filtros
     document.getElementById('search').addEventListener('input', filterProducts);
     document.getElementById('filterCategory').addEventListener('change', filterProducts);
     document.getElementById('filterExpiry').addEventListener('change', filterProducts);
-    
-    // Modal de producto
     document.getElementById('cancelBtn').addEventListener('click', closeProductModal);
     document.getElementById('saveProduct').addEventListener('click', saveProduct);
     document.querySelectorAll('.close-modal').forEach(btn => {
@@ -103,32 +40,49 @@ function setupEventListeners() {
             closeConfirmModal();
         });
     });
-    
-    // Modal de confirmación
     document.getElementById('cancelDelete').addEventListener('click', closeConfirmModal);
     document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
-    
-    // Paginación
     document.getElementById('prevPage').addEventListener('click', goToPrevPage);
     document.getElementById('nextPage').addEventListener('click', goToNextPage);
+    document.getElementById('exportBtn').addEventListener('click', exportData);
+    document.getElementById('filterBtn').addEventListener('click', showAdvancedFilters);
     
-    // Cerrar modal al hacer clic fuera
     window.addEventListener('click', function(event) {
         const productModal = document.getElementById('productModal');
         const confirmModal = document.getElementById('confirmModal');
-        
-        if (event.target === productModal) {
-            closeProductModal();
-        }
-        
-        if (event.target === confirmModal) {
-            closeConfirmModal();
-        }
+        if (event.target === productModal) closeProductModal();
+        if (event.target === confirmModal) closeConfirmModal();
     });
-    
-    // Botones de exportar y filtros avanzados
-    document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('filterBtn').addEventListener('click', showAdvancedFilters);
+}
+
+// Cargar productos desde la API
+async function loadProductsFromAPI() {
+    try {
+        const response = await fetch(`${INVENTORY_API_BASE}/productos`);
+        const result = await response.json();
+        
+        if (result.success) {
+            inventoryData.products = result.data.map(product => ({
+                id: product.id,
+                name: product.nombre,
+                category: product.categoria,
+                quantity: product.stock,
+                unit: 'unidades',
+                expiry: product.fecha_caducidad,
+                location: 'Almacén A',
+                supplier: 'Proveedor General',
+                price: parseFloat(product.precio)
+            }));
+            filteredProducts = [...inventoryData.products];
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error cargando productos:', error);
+        showToast('Error al cargar los productos: ' + error.message, 'error');
+        inventoryData.products = [];
+        filteredProducts = [];
+    }
 }
 
 // Configurar ordenamiento de columnas
@@ -143,12 +97,10 @@ function setupSorting() {
 
 // Ordenar tabla
 function sortTable(column) {
-    // Resetear indicadores de ordenamiento
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.classList.remove('sorted-asc', 'sorted-desc');
     });
     
-    // Determinar dirección de ordenamiento
     if (currentSort.column === column) {
         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
     } else {
@@ -156,24 +108,18 @@ function sortTable(column) {
         currentSort.direction = 'asc';
     }
     
-    // Aplicar ordenamiento
     filteredProducts.sort((a, b) => {
         let aValue = a[column];
         let bValue = b[column];
         
-        // Manejar fechas de vencimiento
         if (column === 'expiry') {
             aValue = new Date(aValue);
             bValue = new Date(bValue);
         }
-        
-        // Manejar cantidades (extraer número)
         if (column === 'quantity') {
             aValue = a.quantity;
             bValue = b.quantity;
         }
-        
-        // Manejar precios
         if (column === 'price') {
             aValue = a.price;
             bValue = b.price;
@@ -184,11 +130,8 @@ function sortTable(column) {
         return 0;
     });
     
-    // Actualizar indicador visual
     const currentTh = document.querySelector(`th[data-sort="${column}"]`);
     currentTh.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    
-    // Volver a la primera página y renderizar
     currentPage = 1;
     renderProductTable();
 }
@@ -200,32 +143,22 @@ function filterProducts() {
     const expiryFilter = document.getElementById('filterExpiry').value;
     
     filteredProducts = inventoryData.products.filter(product => {
-        // Filtro por búsqueda
         const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
-                             product.category.toLowerCase().includes(searchTerm) ||
-                             product.supplier.toLowerCase().includes(searchTerm);
-        
-        // Filtro por categoría
+                             product.category.toLowerCase().includes(searchTerm);
         const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
         
-        // Filtro por vencimiento
         const expiryDate = new Date(product.expiry);
         const today = new Date();
-        const daysToExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
         
         let matchesExpiry = true;
-        if (expiryFilter === 'expired') {
-            matchesExpiry = daysToExpiry < 0;
-        } else if (expiryFilter === 'soon') {
-            matchesExpiry = daysToExpiry >= 0 && daysToExpiry <= 30;
-        } else if (expiryFilter === 'valid') {
-            matchesExpiry = daysToExpiry > 30;
-        }
+        if (expiryFilter === 'expired') matchesExpiry = daysDiff < 0;
+        else if (expiryFilter === 'soon') matchesExpiry = daysDiff >= 0 && daysDiff <= 30;
+        else if (expiryFilter === 'valid') matchesExpiry = daysDiff > 30;
         
         return matchesSearch && matchesCategory && matchesExpiry;
     });
     
-    // Volver a la primera página y renderizar
     currentPage = 1;
     renderProductTable();
     updateSummaryCards();
@@ -238,7 +171,6 @@ function updateSummaryCards() {
     const totalQuantity = filteredProducts.reduce((sum, product) => sum + product.quantity, 0);
     const inventoryValue = filteredProducts.reduce((sum, product) => sum + (product.price * product.quantity), 0);
     
-    // Calcular productos próximos a vencer (en los próximos 30 días)
     const today = new Date();
     const nextMonth = new Date();
     nextMonth.setDate(today.getDate() + 30);
@@ -255,69 +187,77 @@ function updateSummaryCards() {
 }
 
 // Renderizar gráficos
-function renderCharts() {
-    renderCategoryChart();
+async function renderCharts() {
+    await renderCategoryChart();
     renderExpiryChart();
-    renderTrendChart();
+    await renderTrendChart();
 }
 
 // Gráfico de productos por categoría
-function renderCategoryChart() {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
-    
-    // Destruir instancia anterior si existe
-    if (chartInstances.categoryChart) {
-        chartInstances.categoryChart.destroy();
-    }
-    
-    // Calcular productos por categoría
-    const categoryCounts = {};
-    inventoryData.categories.forEach(category => {
-        categoryCounts[category] = 0;
-    });
-    
-    filteredProducts.forEach(product => {
-        categoryCounts[product.category] = (categoryCounts[product.category] || 0) + product.quantity;
-    });
-    
-    const data = inventoryData.categories.map(category => categoryCounts[category] || 0);
-    
-    chartInstances.categoryChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: inventoryData.categories,
-            datasets: [{
-                data: data,
-                backgroundColor: [
-                    '#facc15', '#3b82f6', '#a855f7', '#22c55e', '#ef4444'
-                ],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
+async function renderCategoryChart() {
+    try {
+        const response = await fetch(`${REPORTS_API_BASE}/reportes/metricas`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (chartInstances.categoryChart) {
+                chartInstances.categoryChart.destroy();
+            }
+            
+            const categories = result.data.distribucionCategorias;
+            const labels = categories.map(item => item.categoria);
+            const data = categories.map(item => item.cantidad);
+            
+            chartInstances.categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#facc15', '#3b82f6', '#a855f7', '#22c55e', '#ef4444',
+                            '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                            return `${label}: ${value} unidades (${percentage}%)`;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
                         }
                     }
                 }
-            }
+            });
+        }
+    } catch (error) {
+        console.error('Error cargando datos para gráfico de categorías:', error);
+        renderEmptyCategoryChart();
+    }
+}
+
+function renderEmptyCategoryChart() {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    if (chartInstances.categoryChart) {
+        chartInstances.categoryChart.destroy();
+    }
+    chartInstances.categoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Sin datos'],
+            datasets: [{
+                data: [1],
+                backgroundColor: ['#e5e7eb']
+            }]
         }
     });
 }
@@ -326,7 +266,6 @@ function renderCategoryChart() {
 function renderExpiryChart() {
     const ctx = document.getElementById('expiryChart').getContext('2d');
     
-    // Destruir instancia anterior si existe
     if (chartInstances.expiryChart) {
         chartInstances.expiryChart.destroy();
     }
@@ -345,17 +284,11 @@ function renderExpiryChart() {
         const expiryDate = new Date(product.expiry);
         const quantity = product.quantity;
         
-        if (expiryDate < today) {
-            expired += quantity;
-        } else if (expiryDate <= nextWeek) {
-            soon += quantity;
-        } else if (expiryDate <= nextMonth) {
-            month += quantity;
-        } else if (expiryDate <= nextThreeMonths) {
-            threeMonths += quantity;
-        } else {
-            valid += quantity;
-        }
+        if (expiryDate < today) expired += quantity;
+        else if (expiryDate <= nextWeek) soon += quantity;
+        else if (expiryDate <= nextMonth) month += quantity;
+        else if (expiryDate <= nextThreeMonths) threeMonths += quantity;
+        else valid += quantity;
     });
     
     chartInstances.expiryChart = new Chart(ctx, {
@@ -365,9 +298,7 @@ function renderExpiryChart() {
             datasets: [{
                 label: 'Cantidad de productos',
                 data: [expired, soon, month, threeMonths, valid],
-                backgroundColor: [
-                    '#ef4444', '#f59e0b', '#facc15', '#3b82f6', '#22c55e'
-                ],
+                backgroundColor: ['#ef4444', '#f59e0b', '#facc15', '#3b82f6', '#22c55e'],
                 borderWidth: 0,
                 borderRadius: 4
             }]
@@ -379,69 +310,67 @@ function renderExpiryChart() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        stepSize: 50
+                        stepSize: Math.ceil(Math.max(expired, soon, month, threeMonths, valid) / 5)
                     }
                 }
             },
             plugins: {
-                legend: {
-                    display: false
-                }
+                legend: { display: false }
             }
         }
     });
 }
 
 // Gráfico de tendencia del inventario
-function renderTrendChart() {
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    
-    // Destruir instancia anterior si existe
-    if (chartInstances.trendChart) {
-        chartInstances.trendChart.destroy();
-    }
-    
-    // Calcular tendencia basada en los productos filtrados
-    const totalQuantity = filteredProducts.reduce((sum, product) => sum + product.quantity, 0);
-    const trendData = [...inventoryData.monthlyTrend];
-    trendData[trendData.length - 1] = totalQuantity;
-    
-    chartInstances.trendChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May'],
-            datasets: [{
-                label: 'Cantidad total de productos',
-                data: trendData,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    min: Math.min(...trendData) - 10,
-                    max: Math.max(...trendData) + 10
-                }
+async function renderTrendChart() {
+    try {
+        const response = await fetch(`${REPORTS_API_BASE}/reportes/tendencias`);
+        const result = await response.json();
+        
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (chartInstances.trendChart) chartInstances.trendChart.destroy();
+        
+        let trendData;
+        if (result.success && result.data.length > 0) {
+            trendData = result.data.map(item => item.cantidad || item.valor);
+        } else {
+            const totalQuantity = filteredProducts.reduce((sum, product) => sum + product.quantity, 0);
+            trendData = [totalQuantity * 0.8, totalQuantity * 0.9, totalQuantity * 0.95, totalQuantity, totalQuantity * 1.1];
+        }
+        
+        chartInstances.trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Cantidad total de productos',
+                    data: trendData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
             },
-            plugins: {
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: Math.min(...trendData) * 0.9,
+                        max: Math.max(...trendData) * 1.1
+                    }
                 }
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error cargando tendencias:', error);
+    }
 }
 
 // Renderizar la tabla de productos
@@ -449,7 +378,6 @@ function renderProductTable() {
     const tableBody = document.getElementById('productTable');
     tableBody.innerHTML = '';
     
-    // Calcular productos para la página actual
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     const productsToShow = filteredProducts.slice(startIndex, endIndex);
@@ -502,7 +430,6 @@ function renderProductTable() {
             tableBody.appendChild(row);
         });
         
-        // Agregar event listeners a los botones de acción
         tableBody.querySelectorAll('.btn-action.edit').forEach(btn => {
             btn.addEventListener('click', function() {
                 const productId = parseInt(this.getAttribute('data-id'));
@@ -518,7 +445,6 @@ function renderProductTable() {
         });
     }
     
-    // Actualizar información de paginación
     updatePaginationInfo();
 }
 
@@ -529,12 +455,11 @@ function updatePaginationInfo() {
     document.getElementById('tableInfo').textContent = 
         `Mostrando ${Math.min(filteredProducts.length, currentPage * productsPerPage)} de ${filteredProducts.length} productos`;
     
-    // Habilitar/deshabilitar botones de paginación
     document.getElementById('prevPage').disabled = currentPage === 1;
     document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
 }
 
-// Ir a la página anterior
+// Navegación de páginas
 function goToPrevPage() {
     if (currentPage > 1) {
         currentPage--;
@@ -542,7 +467,6 @@ function goToPrevPage() {
     }
 }
 
-// Ir a la página siguiente
 function goToNextPage() {
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
     if (currentPage < totalPages) {
@@ -557,14 +481,12 @@ function formatDate(dateString) {
     return date.toLocaleDateString('es-ES');
 }
 
-// Abrir modal para agregar/editar producto
+// Modal para agregar/editar producto
 function openProductModal(productId = null) {
     const modal = document.getElementById('productModal');
     const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('productForm');
     
     if (productId) {
-        // Modo edición
         modalTitle.textContent = 'Editar Producto';
         const product = inventoryData.products.find(p => p.id === productId);
         
@@ -580,12 +502,10 @@ function openProductModal(productId = null) {
             document.getElementById('productPrice').value = product.price;
         }
     } else {
-        // Modo agregar
         modalTitle.textContent = 'Agregar Producto';
-        form.reset();
+        document.getElementById('productForm').reset();
         document.getElementById('productId').value = '';
         
-        // Establecer fecha mínima para vencimiento (hoy)
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('productExpiry').min = today;
     }
@@ -593,14 +513,13 @@ function openProductModal(productId = null) {
     modal.style.display = 'flex';
 }
 
-// Cerrar modal de producto
 function closeProductModal() {
     document.getElementById('productModal').style.display = 'none';
     document.getElementById('productForm').reset();
 }
 
-// Guardar producto (agregar o editar)
-function saveProduct() {
+// Guardar producto (con API)
+async function saveProduct() {
     const form = document.getElementById('productForm');
     const productId = document.getElementById('productId').value;
     
@@ -610,89 +529,133 @@ function saveProduct() {
     }
     
     const productData = {
-        name: document.getElementById('productName').value,
-        category: document.getElementById('productCategory').value,
-        quantity: parseInt(document.getElementById('productQuantity').value),
-        unit: document.getElementById('productUnit').value,
-        expiry: document.getElementById('productExpiry').value,
-        location: document.getElementById('productLocation').value,
-        supplier: document.getElementById('productSupplier').value,
-        price: parseFloat(document.getElementById('productPrice').value)
+        nombre: document.getElementById('productName').value,
+        categoria: document.getElementById('productCategory').value,
+        precio: parseFloat(document.getElementById('productPrice').value),
+        stock: parseInt(document.getElementById('productQuantity').value),
+        fecha_caducidad: document.getElementById('productExpiry').value
     };
     
-    if (productId) {
-        // Editar producto existente
-        const index = inventoryData.products.findIndex(p => p.id === parseInt(productId));
-        if (index !== -1) {
-            inventoryData.products[index] = { ...inventoryData.products[index], ...productData };
-            showToast('Producto actualizado correctamente', 'success');
+    try {
+        let response;
+        if (productId) {
+            response = await fetch(`${INVENTORY_API_BASE}/productos/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+        } else {
+            response = await fetch(`${INVENTORY_API_BASE}/productos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
         }
-    } else {
-        // Agregar nuevo producto
-        const newId = Math.max(...inventoryData.products.map(p => p.id), 0) + 1;
-        inventoryData.products.push({ id: newId, ...productData });
-        showToast('Producto agregado correctamente', 'success');
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast(productId ? 'Producto actualizado correctamente' : 'Producto agregado correctamente', 'success');
+            closeProductModal();
+            await loadProductsFromAPI();
+            renderProductTable();
+            updateSummaryCards();
+            renderCharts();
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error guardando producto:', error);
+        showToast('Error al guardar el producto: ' + error.message, 'error');
     }
-    
-    closeProductModal();
-    filterProducts(); // Esto actualizará la tabla y los gráficos
 }
 
-// Editar producto
+// Editar y eliminar productos
 function editProduct(productId) {
     openProductModal(productId);
 }
 
-// Eliminar producto (mostrar confirmación)
 function deleteProduct(productId) {
     productToDelete = productId;
     document.getElementById('confirmModal').style.display = 'flex';
 }
 
-// Confirmar eliminación
-function confirmDelete() {
+async function confirmDelete() {
     if (productToDelete) {
-        inventoryData.products = inventoryData.products.filter(p => p.id !== productToDelete);
-        showToast('Producto eliminado correctamente', 'success');
-        closeConfirmModal();
-        filterProducts(); // Esto actualizará la tabla y los gráficos
+        try {
+            const response = await fetch(`${INVENTORY_API_BASE}/productos/${productToDelete}`, {
+                method: 'DELETE'
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Producto eliminado correctamente', 'success');
+                closeConfirmModal();
+                await loadProductsFromAPI();
+                renderProductTable();
+                updateSummaryCards();
+                renderCharts();
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error('Error eliminando producto:', error);
+            showToast('Error al eliminar el producto: ' + error.message, 'error');
+        }
     }
 }
 
-// Cerrar modal de confirmación
 function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
     productToDelete = null;
 }
 
+// Exportar datos
+async function exportData() {
+    try {
+        const response = await fetch(`${INVENTORY_API_BASE}/productos`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const dataStr = JSON.stringify(result.data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'inventario.json';
+            link.click();
+            
+            showToast('Datos exportados correctamente', 'success');
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error exportando datos:', error);
+        showToast('Error al exportar datos', 'error');
+    }
+}
+
+// Mostrar filtros avanzados
+function showAdvancedFilters() {
+    showToast('Funcionalidad de filtros avanzados en desarrollo', 'info');
+}
+
 // Mostrar notificación toast
 function showToast(message, type = 'info') {
-    // Eliminar toast existente si hay uno
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
         existingToast.remove();
     }
     
-    // Crear nuevo toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     
-    // Eliminar toast después de la animación
     setTimeout(() => {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
     }, 3000);
-}
-
-// Exportar datos (simulado)
-function exportData() {
-    showToast('Funcionalidad de exportación en desarrollo', 'info');
-}
-
-// Mostrar filtros avanzados (simulado)
-function showAdvancedFilters() {
-    showToast('Funcionalidad de filtros avanzados en desarrollo', 'info');
 }
