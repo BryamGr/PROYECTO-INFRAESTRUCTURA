@@ -1,0 +1,17 @@
+{
+  "name": "servidor-inventario",
+  "version": "1.0.0",
+  "description": "Servidor web para gestión de inventario",
+  "main": "servidor-inventario.js",
+  "scripts": {
+    "start": "node servidor-inventario.js",
+    "dev": "node servidor-inventario.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0"
+  },
+  "keywords": ["inventario", "api", "nodejs"],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}
