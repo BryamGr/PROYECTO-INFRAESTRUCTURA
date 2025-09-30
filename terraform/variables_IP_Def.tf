@@ -1,5 +1,5 @@
 variable "allowed_ips" {
-  description = "Lista de direcciones IP permitidas (Variables de ejemplo, estan serian la de los equipos de los integrantes"
+  description = "Lista de direcciones IP permitidas (Variables de ejemplo para los servicios del Fargate, estan serian la de los equipos de los integrantes"
   type        = list(string)
   default     = [
     "123.123.123.123/32",
