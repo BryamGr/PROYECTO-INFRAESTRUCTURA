@@ -1,4 +1,3 @@
-// auth.js - VERSIÓN CON REDIRECCIÓN
 window.onload = function() {
     // Verifica que Cognito esté cargado
     if (typeof AmazonCognitoIdentity === 'undefined') {
@@ -6,12 +5,10 @@ window.onload = function() {
         alert('Error: Recarga la página. Si persiste, verifica la conexión.');
         return;
     }
-    
     const poolData = {
         UserPoolId: 'us-east-2_LZM828aOx',
         ClientId: '6t1j1pprlaiuo86s2tp9p3g7ms'
     };
-
     const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
     const loginForm = document.getElementById('loginForm');
 
