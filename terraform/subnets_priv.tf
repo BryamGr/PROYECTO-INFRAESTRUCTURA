@@ -1,3 +1,4 @@
+#Configuración de las subredes privadas 
 resource "aws_subnet" "private_db_az1" {
   vpc_id            = aws_vpc.dashboard_inventario.id
   cidr_block        = "10.0.10.0/24"
