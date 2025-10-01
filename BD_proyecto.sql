@@ -1,7 +1,6 @@
 -- Crear base de datos
 CREATE DATABASE IF NOT EXISTS inventario;
 USE inventario;
-
 -- Tabla principal de productos
 CREATE TABLE productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -81,3 +80,4 @@ BEGIN
     END IF;
 END//
 DELIMITER ;
+
