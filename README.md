@@ -1,43 +1,105 @@
-# PROYECTO-INFRAESTRUCTURA
+# 📦 Proyecto Infra - Sistema de Control de Inventario en AWS
 
-INTEGRANTES:
-- Cedamanos Guevara,Julio
-- Flores Alvarez, Rodrigo
-- Gutiérrez Rubio, Bryam
-- Ibañez Herrera, Anthony
+> Implementación de un sistema de control de inventario para una bodega, desplegado completamente en la nube de AWS.  
+> El objetivo principal es **automatizar la gestión de productos**, controlando vencimientos y niveles de stock, asegurando acceso autenticado y notificaciones en tiempo real al personal administrativo.
 
+---
 
-# CARACTERÍSTICAS DEL PROYECTO:
-- Gestión de Inventario en Tiempo Real: Control completo de los productos en bodega, incluyendo registro, actualización y eliminación.
-- Detección Automática de Productos Caducados: El sistema identifica automáticamente los productos que han caducado y los deshabilita o elimina según la configuración.
-- Control de Stock Automático: Deshabilita productos cuando el stock llega a cero, manteniendo el registro histórico.
-- Notificaciones Automáticas: Envía correos electrónicos o mensajes al administrador cuando se detectan productos caducados o sin stock.
-- Dashboard Interactivo: Interfaz web responsive que muestra el inventario, métricas clave y reportes.
-- Autenticación Segura: Integración con AWS Cognito para autenticación de usuarios, con soporte para proveedores de identidad como Google.
-- Infraestructura como Código: Despliegue automatizado de la infraestructura en AWS usando Terraform.
-- Alta Disponibilidad y Escalabilidad: Arquitectura diseñada con múltiples zonas de disponibilidad y autoescalado
-- Seguridad Perimetral: Protección con WAF (Web Application Firewall) y distribución de contenido con CloudFront.
-- Base de Datos Relacional: Almacenamiento seguro y confiable con Amazon RDS MySQL.
+## 📋 Tabla de contenido
 
-# LENGUAJE USADO PARA EL PROYECTO:
-- Javascript
-- CSS
-- HTML
-- HCL(archivos terraform)
-- Dockerfile
+- [Contexto del proyecto](#-contexto-del-proyecto)  
+- [Problemática](#-problemática)   
+- [Requisitos no funcionales](#-requisitos-no-funcionales)  
+- [Tecnologías utilizadas](#-tecnologías-utilizadas)  
+- [Estructura del proyecto](#-estructura-del-proyecto)  
+- [Despliegue](#-despliegue)  
+- [Autores](#-autores)  
+- [Licencia](#-licencia)  
 
-# REQUISITOS NO FUNCIONALES PRINCIPALES:
+---
 
-- El sistema debe identificar automáticamente productos caducados basándose en la comparación entre la fecha actual y las fechas de caducidad registradas.
-- El sistema debe deshabilitar productos cuando el stock llegue a cero, manteniendo el registro en la base de datos para propósitos históricos y de reporting.
-- El sistema debe notificar al administrador cuando los productos alcancen un nivel de stock bajo configurable, antes de llegar a cero.
-- El sistema debe autenticar usuarios mediante AWS Cognito, soportando proveedores de identidad externos.
-- El sistema debe generar y validar tokens JWT para asegurar el acceso autorizado a los recursos del sistema.
-- El sistema debe aplicar políticas IAM granulares para controlar el acceso a funciones y datos específicos según roles de usuario
-- El sistema debe enviar notificaciones por correo electrónico al administrador cuando se detecten productos caducados.
-- El sistema debe notificar automáticamente cuando productos alcancen stock cero.
-- El sistema debe permitir configurar horarios específicos para el envío de notificaciones, evitando interrupciones fuera del horario laboral.
-- El sistema debe mostrar métricas clave en tiempo real, incluyendo valor total del inventario, tasa de rotación de productos y listado de productos críticos (caducados o stock bajo).
+## 🧐 Contexto del proyecto
+
+El sistema busca **modernizar la gestión de inventario** de una bodega, aprovechando la infraestructura en la nube de AWS.  
+Con este proyecto se pretende:  
+- Automatizar procesos críticos.  
+- Asegurar notificaciones oportunas.  
+- Brindar métricas en tiempo real para la toma de decisiones.  
+
+---
+
+## ⚠️ Problemática
+
+Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistemas locales que presentan limitaciones:  
+
+- Pérdidas económicas por falta de control de vencimientos.  
+- Desorganización operativa y poca visibilidad.  
+- Ausencia de supervisión automatizada del stock y fechas de caducidad.  
+- Falta de alertas en tiempo real ante productos sin stock.  
+- El administrador depende de revisiones manuales o reportes tardíos.  
+
+---
+
+## 🔔 Requisitos no funcionales
+
+- Envío de **notificaciones por correo electrónico** al detectar productos caducados o stock en cero.  
+- Configuración de **horarios para notificaciones**, evitando interrupciones fuera del horario laboral.  
+- Visualización de métricas en tiempo real:  
+  - Valor total del inventario.  
+  - Tasa de rotación de productos.  
+  - Listado de productos críticos (caducados o en stock bajo).  
+
+---
+
+## 🛠 Tecnologías utilizadas
+
+- **AWS (Cognito, IAM, notificaciones, hosting en la nube)**  
+- **HTML5, CSS3, JavaScript** (interfaz web)  
+- **JWT** para seguridad  
+- **GitHub Pages** para despliegue inicial  
+
+---
+
+## 🗂 Estructura del proyecto
+
+/
+├── Dashboard/
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+│
+├── Web/
+│   ├── auth.js
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+│
+├── terraform/
+│   ├── providers.tf
+│   ├── subnets_priv.tf
+│   ├── subnets_public.tf
+│   └── vpc.tf
+│
+├── web server/
+│
+├── inventario/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── servidor-inventario.js
+│
+├── reportes/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── servidor-reportes.js
+│
+├── BD_proyecto.sql
+└── README.md
+
+---
+
+## 🌐 Despliegue
+
+El sistema se despliega en AWS y también puede publicarse en GitHub Pages para fines de demostración.
 
 COMANDOS DE DESPLIEGUE:
 Inicializar Terraform:
@@ -53,5 +115,16 @@ Aplicar la configuración:
 terraform apply 
 ````````````
 
+---
 
+## 👥 Autores
 
+- Gutierrez Rubio, Bryam
+
+- Cedananos Guevara, Julio
+
+- Flores Alvarez, Rodrigo
+
+- Ibañez Herrera, Luis
+
+---
