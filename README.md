@@ -61,7 +61,7 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 ---
 
 ## 🗂 Estructura del proyecto
-
+```
 /
 ├── Dashboard/
 │   ├── index.html
@@ -94,7 +94,7 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 │
 ├── BD_proyecto.sql
 └── README.md
-
+```
 ---
 
 ## 🌐 Despliegue
