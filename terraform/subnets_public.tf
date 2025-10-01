@@ -1,3 +1,4 @@
+#Configuración de las subnets publicas
 resource "aws_subnet" "public_fargate_az1" {
   vpc_id                  = aws_vpc.dashboard_inventario.id
   cidr_block              = "10.0.1.0/24"
