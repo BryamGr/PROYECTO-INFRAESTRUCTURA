@@ -7,7 +7,7 @@ INTEGRANTES:
 - Ibañez Herrera, Anthony
 
 
-//CARACTERÍSTICAS DEL PROYECTO:
+# CARACTERÍSTICAS DEL PROYECTO:
 -Gestión de Inventario en Tiempo Real: Control completo de los productos en bodega, incluyendo registro, actualización y eliminación.
 -Detección Automática de Productos Caducados: El sistema identifica automáticamente los productos que han caducado y los deshabilita o elimina según la configuración.
 -Control de Stock Automático: Deshabilita productos cuando el stock llega a cero, manteniendo el registro histórico.
@@ -19,14 +19,14 @@ INTEGRANTES:
 -Seguridad Perimetral: Protección con WAF (Web Application Firewall) y distribución de contenido con CloudFront.
 -Base de Datos Relacional: Almacenamiento seguro y confiable con Amazon RDS MySQL.
 
-//LENGUAJE USADO PARA EL PROYECTO:
+# LENGUAJE USADO PARA EL PROYECTO:
 -Javascript
 -CSS
 -HTML
 -HCL(archivos terraform)
 -Dockerfile
 
-//REQUISITOS NO FUNCIONALES PRINCIPALES:
+# REQUISITOS NO FUNCIONALES PRINCIPALES:
 
 El sistema debe identificar automáticamente productos caducados basándose en la comparación entre la fecha actual y las fechas de caducidad registradas.
 El sistema debe deshabilitar productos cuando el stock llegue a cero, manteniendo el registro en la base de datos para propósitos históricos y de reporting.
