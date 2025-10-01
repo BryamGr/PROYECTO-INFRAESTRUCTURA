@@ -1,4 +1,4 @@
-Configuración de la VPC principal
+#Configuración de la VPC principal
 provider "aws" {
   region = "us-east-2"
 }
