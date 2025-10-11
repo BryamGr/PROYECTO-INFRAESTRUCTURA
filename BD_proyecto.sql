@@ -33,7 +33,16 @@ CREATE TABLE productos_sin_stock (
     fecha_caducidad DATE,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
+-- Tabla para empleados
+CREATE TABLE empleados (
+    ID_trabajador SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido_paterno VARCHAR(50) NOT NULL,
+    dni VARCHAR(20) UNIQUE NOT NULL,
+    edad INT CHECK (edad >= 18),
+    categoria VARCHAR(100),
+    contrasena_numerica CHAR(8) NOT NULL CHECK (contrasena_numerica ~ '^[0-9]{8}$')
+);
 -- Insertar 15 productos de ejemplo
 INSERT INTO productos (nombre, categoria, precio, stock, fecha_caducidad) VALUES
 ('Leche Entera', 'Lácteos', 4.50, 120, '2025-12-15'),
@@ -81,6 +90,7 @@ BEGIN
     END IF;
 END//
 DELIMITER ;
+
 
 =======
 -- Crear base de datos
