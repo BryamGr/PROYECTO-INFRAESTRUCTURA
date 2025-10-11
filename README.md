@@ -110,6 +110,10 @@ COMANDO PARA LA VISUALIZACIÓN DE CONTEINERS:
 ````````````
 docker ps
 ````````````
+COMANDO PARA LEVANTAR DOCKER:
+````````````
+docker compose up -d
+````````````
 COMANDOS DE DESPLIEGUE:
 Inicializar Terraform:
 ````````````
