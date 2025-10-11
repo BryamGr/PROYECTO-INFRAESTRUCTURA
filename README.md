@@ -122,7 +122,7 @@ El proyecto se despliega **end-to-end en AWS** con **Ansible + Terraform** y pub
 
 ```bash
 aws --version && terraform -version && ansible --version && docker --version
-
+```
 ---
 
 ### 1) Backend del estado de Terraform (S3-only)
