@@ -50,16 +50,24 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 
 ## 🛠 Tecnologías utilizadas
 
-- **AWS (Cognito, IAM, notificaciones, hosting en la nube)**  
-- **HTML5, CSS3, JavaScript** (interfaz web)  
-- **JWT** para seguridad  
-- **GitHub Pages** para despliegue inicial  
+- **Infraestructura como código:** Terraform (backend S3-only) y Ansible (con Ansible Vault).
+- **Contenedores:** Docker · **Registro:** Amazon ECR.
+- **Orquestación y red:** Amazon ECS Fargate, Application Load Balancer (interno), Amazon API Gateway (HTTP + VPC Link), Amazon VPC (subredes públicas/privadas, NAT Gateway).
+- **Base de datos:** Amazon RDS for MySQL 8.0.
+- **Frontend:** Amazon S3 (2 buckets: *dashboard* y *auth*) + Amazon CloudFront (OAC y fallback para SPA); **opcional:** Route 53 + ACM (certificados) y AWS WAF.
+- **Observabilidad y jobs (opcionales):** CloudWatch Logs, SNS, SQS, Lambda, EventBridge.
+- **Backend:** Node.js (Express, `mysql2`) con **JWT** para autenticación.
+- **Web:** HTML5, CSS3, JavaScript.
 
 ---
 
 ## 🗂 Estructura del proyecto
 ```
 /
+├── Ansible/
+│   ├── playbook.yaml
+│   └── prod.yaml
+│
 ├── Dashboard/
 │   ├── index.html
 │   ├── script.js
@@ -72,12 +80,21 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 │   └── style.css
 │
 ├── terraform/
+│   ├── backend.tf
+│   ├── ecr.tf
+│   ├── frontend.tf
+│   ├── main.tf
+│   ├── outputs.tf
 │   ├── providers.tf
-│   ├── subnets_priv.tf
-│   ├── subnets_public.tf
+│   ├── variables.tf
 │   └── vpc.tf
 │
 ├── web server/
+│
+├── auth/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── servidor-reportes.js
 │
 ├── inventario/
 │   ├── Dockerfile
@@ -96,42 +113,162 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 
 ## 🌐 Despliegue
 
-El sistema se despliega en AWS y también puede publicarse en GitHub Pages para fines de demostración.
+El proyecto se despliega **end-to-end en AWS** con **Ansible + Terraform** y publica los frontends (Dashboard y Auth) en **S3 + CloudFront**. No usamos GitHub Pages ni Docker Compose en producción.
 
+### 0) Prerrequisitos
+- AWS CLI, Terraform, Ansible, Docker instalados.
+- Credenciales de AWS configuradas (perfil o claves).
+- (Recomendado) **Ansible Vault** para secretos.
 
-COMANDO DE LOGUEO EN DOCKER:
-````````````
-docker login
-````````````
-COMANDO PARA LA VISUALIZACIÓN DE CONTEINERS: 
-````````````
-docker ps
-````````````
-COMANDO PARA LEVANTAR DOCKER:
-````````````
-docker compose up -d
-````````````
-COMANDOS DE DESPLIEGUE:
-Inicializar Terraform:
-````````````
-terraform init
-````````````
-Revisar el plan de ejecución:
-````````````
-terraform plan
-````````````
-Aplicar la configuración:
-````````````
-terraform apply 
-````````````
+```bash
+aws --version && terraform -version && ansible --version && docker --version
 
 ---
+
+### 1) Backend del estado de Terraform (S3-only)
+
+Crea el bucket para el **estado remoto** de Terraform (elige un nombre **único globalmente**):
+
+```bash
+aws s3api create-bucket --bucket <TU_BUCKET_STATE> --region us-east-1
+aws s3api put-bucket-versioning --bucket <TU_BUCKET_STATE> --versioning-configuration Status=Enabled
+aws s3api put-bucket-encryption --bucket <TU_BUCKET_STATE> \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+```
+
+> El archivo `backend.tf` ya está preparado para S3-only; Ansible inyecta `bucket/key/region` con `backend_config`.
+
+---
+
+### 2) Configura `ansible/envs/prod.yml` (¡reemplaza estos datos!)
+
+Valores **obligatorios** (reemplaza los placeholders):
+
+* **AWS / backend de Terraform**
+
+  * `aws_region`: `<REPLACE_ME_AWS_REGION>` (ej. `us-east-1`)
+  * `tf_state_bucket`: `<TU_BUCKET_STATE>`
+  * `tf_state_key`: `infra/terraform.tfstate` (o la ruta que prefieras)
+
+* **Frontend (S3/CloudFront)**
+
+  * `enable_frontend`: `true`
+  * `frontend_bucket_name`: `<UNICO_GLOBAL_DASHBOARD>`
+  * `auth_frontend_bucket_name`: `<UNICO_GLOBAL_AUTH>`
+  * `uploads_bucket_name`: `<UNICO_GLOBAL_UPLOADS>` (si lo usas)
+  * `dashboard_src_dir`: `./Dashboard`
+  * `auth_src_dir`: `./Web`
+
+* **Build & push (contenedores)**
+
+  * `ecr_repo_prefix`: `inventario-panel` (o el prefijo que quieras)
+  * `auth_context_dir`, `inventario_context_dir`, `reportes_context_dir`: rutas a tus Dockerfile (p. ej. `.../web_server`)
+  * `image_tag`: `v1.0` (o el tag que publiques)
+
+* **Base de datos (RDS MySQL)**
+
+  * `db_name`: `inventario`
+  * `db_username`: (ej. `root` o `appuser`)
+  * `db_password`: **coloca una contraseña fuerte** (usa **Ansible Vault**)
+
+* **JWT**
+
+  * `jwt_secret`: **coloca un secreto fuerte** (usa **Ansible Vault**)
+
+Valores **opcionales**:
+
+* **Credenciales AWS** (si **no** usas `aws_profile`):
+
+  * `aws_access_key_id`, `aws_secret_access_key`, `aws_session_token`
+
+* **Dominio / DNS / Certificados (pueden quedar vacíos)**
+
+  * `domain_name`, `hosted_zone_id`
+
+    > Si están vacíos, CloudFront usará el dominio `*.cloudfront.net` y el certificado por defecto.
+    > Cuando tengas dominio, complétalos y vuelve a aplicar.
+
+* **WAF**
+
+  * `waf_enable`: `true/false`
+
+> **Recomendado**: cifra `prod.yml` con Vault
+>
+> ```bash
+> ansible-vault create ansible/envs/prod.yml
+> # o si ya existe:
+> ansible-vault edit ansible/envs/prod.yml
+> ```
+
+---
+
+### 3) Instala las colecciones de Ansible
+
+```bash
+ansible-galaxy collection install -r ansible/requirements.yml
+```
+
+---
+
+### 4) Despliegue (build & push → Terraform → S3/CloudFront)
+
+Ejecuta el playbook **end-to-end**:
+
+```bash
+# Con prompt de contraseña de Vault (si cifraste prod.yml)
+ansible-playbook ansible/playbook.yml --ask-vault-pass
+
+# O sin prompt (si guardaste la clave de Vault en un archivo):
+# ansible-playbook ansible/playbook.yml --vault-password-file ~/.vault-pass.txt
+```
+
+El playbook hace automáticamente:
+
+1. **ECR**: crea/valida repos, login y **build & push** de `auth`, `inventario`, `reportes`.
+2. **Terraform**: `init` (backend S3) + `apply` (VPC, RDS, ECS, ALB, API Gateway, S3/CloudFront).
+3. **Frontend**: sincroniza `./Dashboard` → bucket **dashboard** y `./Web` → bucket **auth**.
+4. **CloudFront**: invalidación **solo** de `/index.html` y `/auth/index.html` para propagar cambios al instante.
+
+---
+
+### 5) Outputs y pruebas rápidas
+
+```bash
+terraform output -raw api_invoke_url
+terraform output -raw cloudfront_domain
+terraform output -raw rds_endpoint
+terraform output ecr_repos
+```
+
+Pruebas de salud:
+
+```bash
+API="$(terraform output -raw api_invoke_url)"
+curl -s "$API/auth/health"
+curl -s "$API/inventario/health"
+curl -s "$API/reportes/health"
+
+CF="$(terraform output -raw cloudfront_domain)"
+echo "Dashboard: https://$CF/"
+echo "Auth:      https://$CF/auth/"
+```
+
+---
+
+### 6) Notas importantes
+
+* Los **nombres de buckets S3** deben ser **únicos globalmente** (cámbialos si ves conflicto).
+* Sin `domain_name`/`hosted_zone_id`: CloudFront queda con **cert por defecto** y dominio `*.cloudfront.net`.
+  Cuando tengas dominio, actualiza esos campos y reaplica.
+* Minimiza invalidaciones usando **asset versioning** (hash en nombre de JS/CSS) y cache fuerte; invalida solo los **HTML**.
+* No se usa **Docker Compose** en producción; el runtime es **ECS Fargate**.
+
 
 ## 👥 Autores
 
 - Gutierrez Rubio, Bryam
 
-- Cedananos Guevara, Julio
+- Cedamanos Guevara, Julio
 
 - Flores Alvarez, Rodrigo
 
