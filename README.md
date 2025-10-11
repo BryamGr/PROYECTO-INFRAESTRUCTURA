@@ -42,12 +42,9 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 
 ## 🔔 Requisitos no funcionales
 
-- Envío de **notificaciones por correo electrónico** al detectar productos caducados o stock en cero.  
-- Configuración de **horarios para notificaciones**, evitando interrupciones fuera del horario laboral.  
-- Visualización de métricas en tiempo real:  
-  - Valor total del inventario.  
-  - Tasa de rotación de productos.  
-  - Listado de productos críticos (caducados o en stock bajo).  
+- Envío de **notificaciones por correo electrónico** al detectar productos caducados o stock en cero, garantizando un tiempo máximo de entrega de 60 segundos desde la detección del evento.  
+- El sistema permitirá configurar los horarios de envío de notificaciones, asegurando que no se generen ni envíen alertas fuera del horario laboral definido, con el fin de evitar interrupciones innecesarias.  
+- El sistema deberá mostrar métricas en tiempo real (valor total del inventario, tasa de rotación de productos y listado de productos críticos) con una actualización máxima de 5 segundos entre el cambio en la base de datos y su visualización en pantalla.  
 
 ---
 
