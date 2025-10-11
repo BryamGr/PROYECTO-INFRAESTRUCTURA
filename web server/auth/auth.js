@@ -1,6 +1,4 @@
 servidor-auth.js:
-// auth.js
-// Servicio de autenticación con MySQL, JWT y contraseñas hasheadas (bcrypt)
 
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -15,7 +13,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-// -------- Configuración ----------
+
 const {
   DB_HOST = 'localhost',
   DB_USER = 'root',
