@@ -140,7 +140,7 @@ aws s3api put-bucket-encryption --bucket <TU_BUCKET_STATE> \
 
 ---
 
-### 2) Configura `ansible/envs/prod.yml` (¡reemplaza estos datos!)
+### 2) Configura `ansible/prod.yml` (¡reemplaza estos datos!)
 
 Valores **obligatorios** (reemplaza los placeholders):
 
@@ -195,9 +195,9 @@ Valores **opcionales**:
 > **Recomendado**: cifra `prod.yml` con Vault
 >
 > ```bash
-> ansible-vault create ansible/envs/prod.yml
+> ansible-vault create ansible/prod.yml
 > # o si ya existe:
-> ansible-vault edit ansible/envs/prod.yml
+> ansible-vault edit ansible/prod.yml
 > ```
 
 ---
