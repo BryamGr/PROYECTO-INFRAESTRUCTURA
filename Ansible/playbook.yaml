@@ -132,3 +132,47 @@
       community.general.terraform:
         project_path: "{{ playbook_dir }}/.."
         state: present
+    # ---------- Publicación de frontends a S3 ----------
+    - name: Subir Dashboard a S3
+      when: enable_frontend | default(false)
+      command: >
+        aws s3 sync "{{ dashboard_src_dir }}"
+        "s3://{{ frontend_bucket_name }}/"
+        --delete
+      changed_when: false
+
+    - name: Subir Auth a S3
+      when: enable_frontend | default(false)
+      command: >
+        aws s3 sync "{{ auth_src_dir }}"
+        "s3://{{ auth_frontend_bucket_name }}/"
+        --delete
+      changed_when: false
+
+    # Invalidación de CloudFront (solo HTML de entrada)
+    - name: Obtener ID de la distribución de CloudFront (si existe)
+      when: enable_frontend | default(false)
+      shell: terraform output -raw cloudfront_distribution_id
+      args:
+        chdir: "{{ playbook_dir }}/.."
+      register: cfid_result
+      changed_when: false
+      failed_when: false
+
+    - name: Guardar ID si es válido
+      when: enable_frontend | default(false)
+      set_fact:
+        cfid: "{{ (cfid_result.stdout | default('')) | trim }}"
+      changed_when: false
+
+    - name: Invalidar CloudFront (index de dashboard y auth)
+      when:
+        - enable_frontend | default(false)
+        - cfid is defined
+        - cfid | length > 0
+      command: >
+        aws cloudfront create-invalidation
+        --distribution-id "{{ cfid }}"
+        --paths "/Dashboard/index.html" "/auth/index.html"
+      register: invalidation
+      changed_when: true
