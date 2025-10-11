@@ -20,4 +20,5 @@ ENV JWT_SECRET=change-me
 ENV JWT_EXPIRES_IN=12h
 ENV BCRYPT_ROUNDS=10
 
+
 CMD ["node", "auth.js"]
