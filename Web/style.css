@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 :root {
+=======
+    :root {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     --primary-color: #2a7a52;
     --primary-dark: #1e5c3e;
     --secondary-color: #f9a825;
@@ -13,6 +17,7 @@
     --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
     --border-radius: 12px;
     --transition: all 0.3s ease;
+<<<<<<< HEAD
 }
 
 * {
@@ -22,6 +27,13 @@
 }
 
 body {
+=======
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #1e5c3e 0%, #2a7a52 50%, #4caf50 100%);
     min-height: 100vh;
@@ -30,9 +42,15 @@ body {
     align-items: center;
     color: var(--text-dark);
     line-height: 1.6;
+<<<<<<< HEAD
 }
 
 .background-container {
+=======
+    }
+
+    .background-container {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     display: flex;
     width: 90%;
     max-width: 1100px;
@@ -40,9 +58,15 @@ body {
     border-radius: 20px;
     overflow: hidden;
     box-shadow: var(--shadow-hover);
+<<<<<<< HEAD
 }
 
 .company-branding {
+=======
+    }
+
+    .company-branding {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     flex: 1;
     background: linear-gradient(135deg, rgba(30, 92, 62, 0.9) 0%, rgba(42, 122, 82, 0.85) 100%);
     color: white;
@@ -54,6 +78,7 @@ body {
     text-align: center;
     position: relative;
     overflow: hidden;
+<<<<<<< HEAD
 }
 
 .company-branding::before {
@@ -69,6 +94,20 @@ body {
 }
 
 .company-branding .logo {
+=======
+    }
+
+    .company-branding::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M20,20 L20,80 L80,80 L80,20 Z" fill="none" stroke="white" stroke-width="2"/><path d="M30,30 L30,70 L70,70 L70,30 Z" fill="none" stroke="white" stroke-width="1"/><circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="1"/></svg>');
+    background-size: 200px;
+    opacity: 0.1;
+    }
+
+    .company-branding .logo {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     width: 100px;
     height: 100px;
     background: rgba(255, 255, 255, 0.2);
@@ -79,6 +118,7 @@ body {
     margin-bottom: 20px;
     position: relative;
     z-index: 1;
+<<<<<<< HEAD
 }
 
 .company-branding .logo i {
@@ -87,29 +127,48 @@ body {
 }
 
 .company-branding h1 {
+=======
+    }
+    .company-branding .logo i { font-size: 48px; color: white; }
+
+    .company-branding h1 {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 10px;
     position: relative;
     z-index: 1;
+<<<<<<< HEAD
 }
 
 .company-branding p {
+=======
+    }
+    .company-branding p {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     font-size: 16px;
     opacity: 0.9;
     max-width: 300px;
     position: relative;
     z-index: 1;
+<<<<<<< HEAD
 }
 
 /* Contenedor del login */
 .login-container {
+=======
+    }
+
+    /* Contenedor del login */
+    .login-container {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     flex: 1;
     background: white;
     padding: 50px 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+<<<<<<< HEAD
 }
 
 .login-header {
@@ -118,10 +177,20 @@ body {
 }
 
 .login-header h2 {
+=======
+    }
+
+    .login-header {
+    margin-bottom: 30px;
+    text-align: center;
+    }
+    .login-header h2 {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     font-size: 28px;
     font-weight: 600;
     color: var(--primary-color);
     margin-bottom: 8px;
+<<<<<<< HEAD
 }
 
 .login-header p {
@@ -135,11 +204,20 @@ body {
 }
 
 .input-group label {
+=======
+    }
+    .login-header p { color: var(--text-light); font-size: 14px; }
+
+    /* Grupos de entrada */
+    .input-group { margin-bottom: 20px; }
+    .input-group label {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     display: block;
     margin-bottom: 8px;
     font-size: 14px;
     font-weight: 500;
     color: var(--text-dark);
+<<<<<<< HEAD
 }
 
 .input-wrapper {
@@ -149,14 +227,29 @@ body {
 }
 
 .input-wrapper .icon {
+=======
+    }
+
+    .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    }
+    .input-wrapper .icon {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     position: absolute;
     left: 15px;
     color: var(--text-light);
     font-size: 16px;
     z-index: 1;
+<<<<<<< HEAD
 }
 
 .input-wrapper input {
+=======
+    }
+    .input-wrapper input {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     width: 100%;
     padding: 14px 45px 14px 45px;
     border: 2px solid var(--border-color);
@@ -164,13 +257,19 @@ body {
     font-size: 15px;
     transition: var(--transition);
     background-color: var(--bg-light);
+<<<<<<< HEAD
 }
 
 .input-wrapper input:focus {
+=======
+    }
+    .input-wrapper input:focus {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     outline: none;
     border-color: var(--primary-color);
     background-color: white;
     box-shadow: 0 0 0 3px rgba(42, 122, 82, 0.1);
+<<<<<<< HEAD
 }
 
 .input-wrapper input:valid {
@@ -182,12 +281,20 @@ body {
 }
 
 .toggle-password {
+=======
+    }
+    .input-wrapper input:valid { border-color: var(--success-color); }
+    .input-wrapper input:invalid:not(:focus):not(:placeholder-shown) { border-color: var(--error-color); }
+
+    .toggle-password {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     position: absolute;
     right: 15px;
     cursor: pointer;
     color: var(--text-light);
     font-size: 16px;
     transition: var(--transition);
+<<<<<<< HEAD
 }
 
 .toggle-password:hover {
@@ -195,10 +302,17 @@ body {
 }
 
 .input-status {
+=======
+    }
+    .toggle-password:hover { color: var(--primary-color); }
+
+    .input-status {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     position: absolute;
     right: 45px;
     opacity: 0;
     transition: var(--transition);
+<<<<<<< HEAD
 }
 
 .input-wrapper input:valid + .input-status {
@@ -212,20 +326,35 @@ body {
 }
 
 .error-message {
+=======
+    }
+    .input-wrapper input:valid + .input-status { opacity: 1; color: var(--success-color); }
+    .input-wrapper input:invalid:not(:focus):not(:placeholder-shown) + .input-status { opacity: 1; color: var(--error-color); }
+
+    .error-message {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     display: block;
     font-size: 12px;
     color: var(--error-color);
     margin-top: 5px;
     min-height: 18px;
+<<<<<<< HEAD
 }
 
 /* Opciones */
 .options {
+=======
+    }
+
+    /* Opciones */
+    .options {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 25px 0;
     font-size: 14px;
+<<<<<<< HEAD
 }
 
 .checkbox-container {
@@ -239,6 +368,16 @@ body {
 }
 
 .checkmark {
+=======
+    }
+    .checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    }
+    .checkbox-container input { display: none; }
+    .checkmark {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     width: 18px;
     height: 18px;
     border: 2px solid var(--border-color);
@@ -246,6 +385,7 @@ body {
     margin-right: 8px;
     position: relative;
     transition: var(--transition);
+<<<<<<< HEAD
 }
 
 .checkbox-container input:checked + .checkmark {
@@ -254,6 +394,14 @@ body {
 }
 
 .checkbox-container input:checked + .checkmark:after {
+=======
+    }
+    .checkbox-container input:checked + .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    }
+    .checkbox-container input:checked + .checkmark:after {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     content: '';
     position: absolute;
     left: 5px;
@@ -263,6 +411,7 @@ body {
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+<<<<<<< HEAD
 }
 
 .forgot {
@@ -277,6 +426,15 @@ body {
 
 /* Botón */
 .btn {
+=======
+    }
+
+    .forgot { color: var(--primary-color); text-decoration: none; transition: var(--transition); }
+    .forgot:hover { text-decoration: underline; }
+
+    /* Botón */
+    .btn {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     width: 100%;
     padding: 15px;
     border: none;
@@ -293,6 +451,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 50px;
+<<<<<<< HEAD
 }
 
 .btn:hover {
@@ -333,17 +492,38 @@ body {
 }
 
 .signup-text {
+=======
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .btn:active { transform: translateY(0); }
+    .btn-loader { display: none; position: absolute; }
+    .btn.loading .btn-text { opacity: 0; }
+    .btn.loading .btn-loader { display: block; }
+    .spinner {
+    width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .signup-text {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     margin-top: 25px;
     text-align: center;
     font-size: 14px;
     color: var(--text-light);
+<<<<<<< HEAD
 }
 
 .signup-text a {
+=======
+    }
+    .signup-text a {
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
+<<<<<<< HEAD
 }
 
 .signup-text a:hover {
@@ -390,3 +570,21 @@ body {
         padding: 12px 40px 12px 40px;
     }
 }
+=======
+    }
+    .signup-text a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+    .background-container { flex-direction: column; width: 95%; min-height: auto; }
+    .company-branding { padding: 30px 20px; }
+    .login-container { padding: 30px 25px; }
+    .options { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .forgot { align-self: flex-end; }
+    }
+    @media (max-width: 480px) {
+    .company-branding h1 { font-size: 24px; }
+    .login-header h2 { font-size: 24px; }
+    .input-wrapper input { padding: 12px 40px 12px 40px; }
+    }
+>>>>>>> 2271e8b (feat: Cambios respecto a Cognito)
