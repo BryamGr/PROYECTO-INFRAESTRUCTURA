@@ -101,6 +101,15 @@ Actualmente, muchas bodegas gestionan el inventario de forma manual o con sistem
 
 El sistema se despliega en AWS y también puede publicarse en GitHub Pages para fines de demostración.
 
+
+COMANDO DE LOGUEO EN DOCKER:
+````````````
+docker login
+````````````
+COMANDO PARA LA VISUALIZACIÓN DE CONTEINERS: 
+````````````
+docker ps
+````````````
 COMANDOS DE DESPLIEGUE:
 Inicializar Terraform:
 ````````````
