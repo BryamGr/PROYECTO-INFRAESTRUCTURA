@@ -1,10 +1,9 @@
-- name: Desplegar Infra con Terraform
+- name: Build & push imágenes a ECR y aplicar Terraform
   hosts: localhost
   connection: local
   vars_files:
     - envs/prod.yml
 
-  # Exporta credenciales/region
   environment:
     AWS_ACCESS_KEY_ID: "{{ aws_access_key_id | default(omit) }}"
     AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key | default(omit) }}"
@@ -12,9 +11,69 @@
     AWS_PROFILE: "{{ aws_profile | default(omit) }}"
     AWS_DEFAULT_REGION: "{{ aws_region }}"
 
+  pre_tasks:
+    - name: Requisitos de colecciones
+      debug: { msg: "Ejecuta: ansible-galaxy collection install -r ansible/requirements.yml" }
+
+    - name: Validar variables mínimas
+      assert:
+        that:
+          - project_name | length > 0
+          - aws_region | length > 0
+          - frontend_bucket_name | length > 0
+          - uploads_bucket_name | length > 0
+          - db_password | length > 0
+          - auth_context_dir | length > 0
+          - inventario_context_dir | length > 0
+          - reportes_context_dir | length > 0
+
   tasks:
-    # ... (tus tasks de ECR login/build/push)
-    - name: Init Terraform (con backend)
+    - name: Crear repos ECR (idempotente)
+      amazon.aws.ecr_repository:
+        name: "{{ ecr_repo_prefix }}/{{ item }}"
+        image_tag_mutability: MUTABLE
+        image_scanning_configuration: { scanOnPush: true }
+      loop: [ "auth", "inventario", "reportes" ]
+      register: ecr_repos
+
+    - name: Obtener URIs de repos
+      set_fact:
+        ecr_auth_uri: "{{ (ecr_repos.results | selectattr('item','equalto','auth') | first).repository.repositoryUri }}"
+        ecr_inv_uri:  "{{ (ecr_repos.results | selectattr('item','equalto','inventario') | first).repository.repositoryUri }}"
+        ecr_rep_uri:  "{{ (ecr_repos.results | selectattr('item','equalto','reportes') | first).repository.repositoryUri }}"
+
+    - name: Login a ECR
+      amazon.aws.ecr_login:
+        region: "{{ aws_region }}"
+
+    - name: Build & Push AUTH
+      community.docker.docker_image:
+        name: "{{ ecr_auth_uri }}"
+        tag: "{{ image_tag }}"
+        push: true
+        build: { path: "{{ auth_context_dir }}", dockerfile: Dockerfile }
+
+    - name: Build & Push INVENTARIO
+      community.docker.docker_image:
+        name: "{{ ecr_inv_uri }}"
+        tag: "{{ image_tag }}"
+        push: true
+        build: { path: "{{ inventario_context_dir }}", dockerfile: Dockerfile }
+
+    - name: Build & Push REPORTES
+      community.docker.docker_image:
+        name: "{{ ecr_rep_uri }}"
+        tag: "{{ image_tag }}"
+        push: true
+        build: { path: "{{ reportes_context_dir }}", dockerfile: Dockerfile }
+
+    - name: Definir imágenes para Terraform
+      set_fact:
+        auth_image: "{{ ecr_auth_uri }}:{{ image_tag }}"
+        inventario_image: "{{ ecr_inv_uri }}:{{ image_tag }}"
+        reportes_image: "{{ ecr_rep_uri }}:{{ image_tag }}"
+
+    - name: Terraform init con backend S3 (sin DynamoDB)
       community.general.terraform:
         project_path: "{{ playbook_dir }}/.."
         state: present
@@ -23,15 +82,53 @@
           bucket: "{{ tf_state_bucket }}"
           key: "{{ tf_state_key }}"
           region: "{{ aws_region }}"
-          dynamodb_table: "{{ tf_lock_table }}"
         variables:
           aws_region: "{{ aws_region }}"
           aws_profile: "{{ aws_profile | default(omit) }}"
           aws_access_key_id: "{{ aws_access_key_id | default(omit) }}"
           aws_secret_access_key: "{{ aws_secret_access_key | default(omit) }}"
           aws_session_token: "{{ aws_session_token | default(omit) }}"
-          # ... (resto de variables de tu infra)
-    - name: Apply Terraform
+
+          project_name: "{{ project_name }}"
+
+          # Frontend / DNS (templates pasan tal cual; si están vacíos, el plan puede fallar)
+          domain_name: "{{ domain_name }}"
+          hosted_zone_id: "{{ hosted_zone_id }}"
+          waf_enable: "{{ waf_enable }}"
+
+          # Buckets
+          frontend_bucket_name: "{{ frontend_bucket_name }}"
+          uploads_bucket_name: "{{ uploads_bucket_name }}"
+
+          # ECR / Imágenes recién subidas
+          ecr_repo_prefix: "{{ ecr_repo_prefix }}"
+          auth_image: "{{ auth_image }}"
+          inventario_image: "{{ inventario_image }}"
+          reportes_image: "{{ reportes_image }}"
+
+          # DB (MySQL)
+          db_engine: "{{ db_engine }}"
+          db_engine_version: "{{ db_engine_version }}"
+          db_instance_class: "{{ db_instance_class }}"
+          db_name: "{{ db_name }}"
+          db_username: "{{ db_username }}"
+          db_password: "{{ db_password }}"
+
+          # Puertos / escala
+          inventario_port: "{{ inventario_port }}"
+          reportes_port: "{{ reportes_port }}"
+          auth_port: "{{ auth_port }}"
+          desired_count_auth: "{{ desired_count_auth }}"
+          desired_count_inventario: "{{ desired_count_inventario }}"
+          desired_count_reportes: "{{ desired_count_reportes }}"
+
+          # Red / API / JWT
+          enable_nat_gateway: "{{ enable_nat_gateway }}"
+          api_stage_name: "{{ api_stage_name }}"
+          jwt_secret: "{{ jwt_secret }}"
+          tags: "{{ tags }}"
+
+    - name: Terraform apply
       community.general.terraform:
         project_path: "{{ playbook_dir }}/.."
         state: present
