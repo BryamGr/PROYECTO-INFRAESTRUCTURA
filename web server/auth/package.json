@@ -1,0 +1,22 @@
+{
+  "name": "servidor-auth",
+  "version": "1.0.0",
+  "description": "Servicio de autenticación para el inventario",
+  "main": "auth.js",
+  "scripts": {
+    "start": "node auth.js",
+    "dev": "node auth.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.3.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.0"
+  },
+  "keywords": ["auth", "api", "nodejs", "mysql", "jwt"],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}
