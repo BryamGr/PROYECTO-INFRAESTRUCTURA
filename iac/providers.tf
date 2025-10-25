@@ -20,12 +20,6 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
   token      = var.aws_session_token
 
-  # assume_role {
-  #   role_arn     = var.assume_role_arn
-  #   session_name = "tf-session"
-  #   external_id  = var.assume_role_external_id
-  # }
-}
 
 # Certificados para CloudFront deben estar en us-east-1
 provider "aws" {
