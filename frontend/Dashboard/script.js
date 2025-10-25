@@ -1,17 +1,13 @@
     document.addEventListener('DOMContentLoaded', async () => {
-    // Inicialización simple (sin sesión obligatoria)
     await initDashboard();
     setupEventListeners();
     });
 
-    // =========================
-    // URLs de la API (ajústalas al desplegar)
     const INVENTORY_API_BASE = 'http://localhost:3000/api';
     const REPORTS_API_BASE   = 'http://localhost:3001/api';
-    const AUTH_API_BASE      = 'http://localhost:3002/api'; // Tu API propia de usuarios (sin Cognito)
-    // =========================
+    const AUTH_API_BASE      = 'http://localhost:3002/api'; 
 
-    // Variables globales
+
     let currentPage = 1;
     const productsPerPage = 10;
     let currentSort = { column: 'name', direction: 'asc' };
@@ -20,8 +16,6 @@
     let chartInstances = {};
     let inventoryData = { products: [] };
 
-    // =========================
-    // Dashboard
     async function initDashboard() {
     await loadProductsFromAPI();
     updateSummaryCards();
@@ -29,14 +23,13 @@
     renderProductTable();
     setupSorting();
 
-    // Restricción mínima a fecha
     const today = new Date().toISOString().split('T')[0];
     const expiryInput = document.getElementById('productExpiry');
     if (expiryInput) expiryInput.min = today;
     }
 
     function setupEventListeners() {
-    // Productos
+
     document.getElementById('addProduct').addEventListener('click', openProductModal);
     document.getElementById('search').addEventListener('input', filterProducts);
     document.getElementById('filterCategory').addEventListener('change', filterProducts);
@@ -50,7 +43,6 @@
     document.getElementById('exportBtn').addEventListener('click', exportData);
     document.getElementById('filterBtn').addEventListener('click', showAdvancedFilters);
 
-    // Usuarios
     const registerUserBtn = document.getElementById('registerUser');
     const cancelUserBtn   = document.getElementById('cancelUser');
     const createUserBtn   = document.getElementById('createUser');
@@ -58,7 +50,6 @@
     if (cancelUserBtn)   cancelUserBtn.addEventListener('click', closeUserModal);
     if (createUserBtn)   createUserBtn.addEventListener('click', createUser);
 
-    // Cerrar por X de cualquier modal
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', function() {
         closeProductModal();
@@ -67,7 +58,6 @@
         });
     });
 
-    // Cerrar clickeando fuera
     window.addEventListener('click', function(event) {
         ['productModal','confirmModal','userModal'].forEach(id => {
         const m = document.getElementById(id);
@@ -76,8 +66,7 @@
     });
     }
 
-    // =========================
-    // Inventario (API)
+    
     async function loadProductsFromAPI() {
     try {
         const response = await fetch(`${INVENTORY_API_BASE}/productos`);
@@ -106,7 +95,6 @@
     }
     }
 
-    // =========================
     function setupSorting() {
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', function() {
@@ -143,8 +131,7 @@
     renderProductTable();
     }
 
-    // =========================
-    // Filtro + cards + charts
+    
     function filterProducts() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const categoryFilter = document.getElementById('filterCategory').value;
@@ -227,7 +214,6 @@
         }
     } catch (_) {}
 
-    // fallback sin datos
     chartInstances.categoryChart = new Chart(ctx, {
         type:'doughnut',
         data:{ labels:['Sin datos'], datasets:[{ data:[1], backgroundColor:['#e5e7eb'] }] }
@@ -315,8 +301,6 @@
     });
     }
 
-    // =========================
-    // Tabla
     function renderProductTable() {
     const tableBody = document.getElementById('productTable');
     tableBody.innerHTML = '';
@@ -398,8 +382,6 @@
     if (currentPage < totalPages) { currentPage++; renderProductTable(); }
     }
 
-    // =========================
-    // Utilidades
     function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES');
@@ -414,7 +396,6 @@
     setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
     }
 
-    // Password temporal local (no depende de políticas externas)
     function generateTempPassword() {
     const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
     const lower = 'abcdefghijkmnopqrstuvwxyz';
@@ -430,8 +411,6 @@
     try { await navigator.clipboard.writeText(text); } catch {}
     }
 
-    // =========================
-    // Modales Producto
     function openProductModal(productId = null) {
     const modal = document.getElementById('productModal');
     const modalTitle = document.getElementById('modalTitle');
@@ -466,7 +445,6 @@
     if (form) form.reset();
     }
 
-    // Guardar producto (API)
     async function saveProduct() {
     const form = document.getElementById('productForm');
     const productId = document.getElementById('productId').value;
@@ -532,7 +510,6 @@
     productToDelete = null;
     }
 
-    // Exportar datos
     async function exportData() {
     try {
         const response = await fetch(`${INVENTORY_API_BASE}/productos`);
@@ -556,8 +533,6 @@
     showToast('Funcionalidad de filtros avanzados en desarrollo', 'info');
     }
 
-    // =========================
-    // Usuarios (modal + llamada a tu backend propio)
     function openUserModal() {
     const modal = document.getElementById('userModal');
     const form  = document.getElementById('userForm');
@@ -580,14 +555,13 @@
         return;
     }
 
-    // Contraseña temporal generada en el front (por comodidad de pruebas)
     const tempPassword = generateTempPassword();
 
     const payload = {
         nombre: name,
         email,
         telefono: phone || null,
-        rol: role,                // <-- rol propio (no grupos Cognito)
+        rol: role,                
         passwordTemporal: tempPassword
     };
 
@@ -604,7 +578,6 @@
         closeUserModal();
         showToast('Usuario creado', 'success');
 
-        // Copia la contraseña temporal para que pruebes inmediatamente
         await copyToClipboard(tempPassword);
         alert(`Usuario creado:\n\nEmail: ${email}\nContraseña temporal: ${tempPassword}\n\n(La contraseña se copió al portapapeles)`);
     } catch (err) {
