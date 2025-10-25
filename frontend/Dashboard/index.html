@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard de Inventario</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
@@ -17,8 +15,6 @@
         <h1><i class="fas fa-boxes"></i> Dashboard de Inventario</h1>
         <p>Gestión completa de productos envasados</p>
       </div>
-
-      <!-- Solo estos dos botones -->
       <div class="header-actions">
         <button id="registerUser" class="btn-secondary">
           <i class="fas fa-user-plus"></i> Registrar Usuario
@@ -31,7 +27,6 @@
   </header>
 
   <main>
-    <!-- Cards -->
     <section class="cards">
       <div class="card blue">
         <div class="card-icon"><i class="fas fa-box"></i></div>
@@ -63,7 +58,7 @@
       </div>
     </section>
 
-    <!-- Charts -->
+
     <section class="charts">
       <div class="chart-box">
         <div class="chart-header">
@@ -90,7 +85,7 @@
       </div>
     </section>
 
-    <!-- Tabla de productos -->
+
     <section class="table-section">
       <div class="section-header">
         <h3><i class="fas fa-table"></i> Inventario de Productos</h3>
@@ -156,7 +151,7 @@
     </section>
   </main>
 
-  <!-- Modal Agregar/Editar producto -->
+
   <div id="productModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -221,7 +216,6 @@
     </div>
   </div>
 
-  <!-- Modal Confirmar eliminación -->
   <div id="confirmModal" class="modal">
     <div class="modal-content confirm-modal">
       <div class="modal-header">
@@ -238,7 +232,6 @@
     </div>
   </div>
 
-  <!-- Modal Registrar Usuario (rol propio; no hay Cognito) -->
   <div id="userModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -278,7 +271,6 @@
     </div>
   </div>
 
-  <!-- Tu lógica del dashboard -->
   <script src="script.js"></script>
 </body>
 </html>
