@@ -35,11 +35,9 @@ const pool = mysql.createPool({
   waitForConnections: true
 });
 
-// Asegura columnas necesarias sin romper tu esquema actual
 async function ensureSchema() {
   const conn = await pool.getConnection();
   try {
-    // password_hash para guardar bcrypt. Permite NULL para compatibilidad.
     await conn.query(`
       ALTER TABLE empleados
       ADD COLUMN IF NOT EXISTS password_hash VARCHAR(100) NULL AFTER contrasena_numerica
@@ -77,7 +75,6 @@ async function countUsers() {
   return rows[0].total;
 }
 
-// Middleware de protección por Bearer token
 function authRequired(req, res, next) {
   const header = req.headers.authorization || '';
   const [, token] = header.split(' ');
@@ -90,22 +87,18 @@ function authRequired(req, res, next) {
   }
 }
 
-// Rate limit básico para endpoints sensibles
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10, // 10 intentos por minuto
+  max: 10, 
   standardHeaders: true,
   legacyHeaders: false
 });
 
-// ---------- Rutas ----------
 
-// Health
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', service: 'auth' });
 });
 
-// Registro
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
     const { nombre, apellido_paterno, dni, edad, categoria = 'User', password } = req.body;
@@ -114,22 +107,17 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
     }
 
-    // ¿Existe DNI?
     const existing = await findUserByDni(dni);
     if (existing) {
       return res.status(409).json({ success: false, error: 'DNI ya registrado' });
     }
 
-    // Primera cuenta del sistema => la elevamos a Admin automáticamente
     const total = await countUsers();
     const rolFinal = total === 0 ? 'Admin' : categoria;
 
-    // Hash de la contraseña
     const salt = await bcrypt.genSalt(Number(BCRYPT_ROUNDS));
     const hash = await bcrypt.hash(password, salt);
 
-    // Si te interesa mantener la columna contrasena_numerica:
-    // guardamos el valor solo si es exactamente 8 dígitos; si no, NULL
     const contrasenaNumerica = /^\d{8}$/.test(password) ? password : null;
 
     const [result] = await pool.query(
@@ -160,7 +148,6 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   }
 });
 
-// Login
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { dni, password } = req.body;
@@ -176,9 +163,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     if (user.password_hash) {
       isValid = await bcrypt.compare(password, user.password_hash);
     } else if (user.contrasena_numerica) {
-      // Compatibilidad: valida contra la clave numérica
       isValid = password === user.contrasena_numerica;
-      // Si valida y no hay hash, hacemos "hash-upgrade" transparente
       if (isValid) {
         const salt = await bcrypt.genSalt(Number(BCRYPT_ROUNDS));
         const hash = await bcrypt.hash(password, salt);
@@ -211,7 +196,6 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
-// Perfil (requiere token)
 app.get('/api/auth/me', authRequired, async (req, res) => {
   try {
     const user = await findUserByDni(req.user.dni);
