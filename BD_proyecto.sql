@@ -1,9 +1,7 @@
--- Crear BD con charset
 CREATE DATABASE IF NOT EXISTS inventario
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE inventario;
 
--- Tabla principal
 CREATE TABLE productos (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -15,7 +13,6 @@ CREATE TABLE productos (
   INDEX idx_caducidad (fecha_caducidad)
 ) ENGINE=InnoDB;
 
--- Caducados (1 fila por producto)
 CREATE TABLE productos_caducados (
   id INT UNSIGNED PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -29,7 +26,6 @@ CREATE TABLE productos_caducados (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- Sin stock (1 fila por producto)
 CREATE TABLE productos_sin_stock (
   id INT UNSIGNED PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -43,7 +39,6 @@ CREATE TABLE productos_sin_stock (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- Empleados
 CREATE TABLE empleados (
   id_trabajador BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL,
@@ -56,7 +51,6 @@ CREATE TABLE empleados (
   CONSTRAINT chk_contrasena CHECK (REGEXP_LIKE(contrasena_numerica, '^[0-9]{8}$'))
 ) ENGINE=InnoDB;
 
--- Datos de ejemplo
 INSERT INTO productos (nombre, categoria, precio, stock, fecha_caducidad) VALUES
 ('Leche Entera','Lácteos',4.50,120,'2025-12-15'),
 ('Yogurt Natural','Lácteos',2.80,80,'2025-11-10'),
@@ -74,7 +68,6 @@ INSERT INTO productos (nombre, categoria, precio, stock, fecha_caducidad) VALUES
 ('Caramelos Surtidos','Dulces',6.00,500,'2026-12-12'),
 ('Café Molido','Bebidas',18.00,60,'2027-05-05');
 
--- Triggers: insert y update, también limpian cuando se revierte la condición
 DELIMITER //
 
 CREATE TRIGGER productos_ai
@@ -120,7 +113,6 @@ BEGIN
 END//
 DELIMITER ;
 
--- EVENT diario para sincronizar sin depender de updates (requiere event_scheduler=ON)
 DELIMITER //
 CREATE EVENT IF NOT EXISTS sync_inventario_diario
 ON SCHEDULE EVERY 1 DAY
@@ -144,4 +136,5 @@ BEGIN
   WHERE p.stock > 0;
 END//
 DELIMITER ;
+
 
