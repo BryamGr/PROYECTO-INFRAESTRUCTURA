@@ -25,7 +25,6 @@ resource "aws_s3_bucket_public_access_block" "auth_spa" {
   restrict_public_buckets = true
 }
 
-# (Opcional) uploads si lo usas desde el front
 resource "aws_s3_bucket" "uploads" {
   bucket = var.uploads_bucket_name
   tags   = merge(var.tags, { Name = "${var.project_name}-uploads" })
@@ -38,10 +37,6 @@ resource "aws_s3_bucket_public_access_block" "uploads_block" {
   restrict_public_buckets = true
 }
 
-##########################
-# CloudFront (opcional)
-##########################
-# OAC para cada origen S3
 resource "aws_cloudfront_origin_access_control" "oac_dashboard" {
   count                             = var.enable_frontend ? 1 : 0
   name                              = "${var.project_name}-oac-dashboard"
@@ -57,7 +52,7 @@ resource "aws_cloudfront_origin_access_control" "oac_auth" {
   signing_protocol                  = "sigv4"
 }
 
-# Cert y DNS sólo si hay dominio
+
 resource "aws_acm_certificate" "cert" {
   count             = var.enable_frontend && var.domain_name != "" ? 1 : 0
   provider          = aws.use1
@@ -105,7 +100,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_access_control_id = aws_cloudfront_origin_access_control.oac_auth[0].id
   }
 
-  # Comportamientos (routing)
+
   default_cache_behavior {
     target_origin_id       = "s3-dashboard"
     viewer_protocol_policy = "redirect-to-HTTPS"
@@ -122,7 +117,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     compress               = true
   }
 
-  # SPA fallback (sirve /index.html en 403/404)
+ 
   custom_error_response {
     error_code            = 403
     response_code         = 200
@@ -134,7 +129,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     response_page_path    = "/index.html"
   }
 
-  # Certificado: usa ACM si hay dominio; si no, usa el default de CloudFront
   viewer_certificate {
     acm_certificate_arn              = var.domain_name != "" ? aws_acm_certificate_validation.cert[0].certificate_arn : null
     ssl_support_method               = var.domain_name != "" ? "sni-only" : null
@@ -142,13 +136,12 @@ resource "aws_cloudfront_distribution" "cdn" {
     cloudfront_default_certificate   = var.domain_name == ""
   }
 
-  # WAF solo si se desea y hay distro
   web_acl_id = var.waf_enable ? aws_wafv2_web_acl.cf[0].arn : null
 
   tags = merge(var.tags, { Name = "${var.project_name}-cdn" })
 }
 
-# Bucket policies para permitir acceso sólo desde ESTA distro
+
 data "aws_iam_policy_document" "dash_oac" {
   count = var.enable_frontend ? 1 : 0
   statement {
@@ -219,7 +212,7 @@ resource "aws_wafv2_web_acl" "cf" {
   tags = var.tags
 }
 
-# DNS sólo si hay dominio
+
 resource "aws_route53_record" "frontend" {
   count  = var.enable_frontend && var.domain_name != "" ? 1 : 0
   zone_id = var.hosted_zone_id
