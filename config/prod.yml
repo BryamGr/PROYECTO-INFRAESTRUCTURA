@@ -1,0 +1,59 @@
+# ==== Credenciales AWS (TEMPLATE: reemplazar o usar perfil) ====
+# aws_access_key_id: "<REPLACE_ME_AWS_ACCESS_KEY_ID>"
+# aws_secret_access_key: "<REPLACE_ME_AWS_SECRET_ACCESS_KEY>"
+# aws_session_token: "<REPLACE_ME_AWS_SESSION_TOKEN>"   # opcional
+
+aws_profile: "default"
+aws_region: "<REPLACE_ME_AWS_REGION>"   # TEMPLATE (ej. us-east-1)
+
+# ==== Backend Terraform (S3-only) ====
+tf_state_bucket: inventario
+tf_state_key: infra/terraform.tfstate   # la "ruta" del state dentro del bucket
+
+# ==== Proyecto / Naming ====
+project_name: inventario
+
+# ==== Frontend / DNS (TEMPLATES: aún no tienes dominio) ====
+domain_name: "<REPLACE_ME_DOMAIN_NAME_OR_EMPTY>"
+hosted_zone_id: "<REPLACE_ME_HOSTED_ZONE_ID_OR_EMPTY>"
+waf_enable: true
+
+# ==== Buckets de la app ====
+# Nota: S3 exige nombres únicos globales y no puedes reutilizar el mismo para dos buckets.
+# Los dejaste iguales; funciona como plantilla pero deberás diferenciarlos al usarlo realmente.
+frontend_bucket_name: inventario
+uploads_bucket_name: inventario
+
+# ==== ECR / Docker build contexts ====
+ecr_repo_prefix: inventario-panel
+auth_context_dir: ".../web_server/auth"
+inventario_context_dir: ".../web_server/inventario"
+reportes_context_dir: ".../web_server/reportes"
+image_tag: "v1.0"
+
+# ==== Base de datos (RDS MySQL) — alineado a tu dbConfig ====
+db_engine: "mysql"
+db_engine_version: "8.0"
+db_instance_class: "db.t4g.micro"
+db_name: "inventario"
+db_username: "root"         # según tu código
+db_password: "password"     # cámbialo y usa Vault en cuanto puedas
+
+# ==== Puertos / Escala ECS ====
+inventario_port: 3000
+reportes_port: 3001
+auth_port: 3002
+desired_count_auth: 1
+desired_count_inventario: 1
+desired_count_reportes: 1
+
+# ==== Red / API ====
+enable_nat_gateway: true
+api_stage_name: "prod"
+
+# ==== JWT compartido ====
+jwt_secret: "123456789"     # débil; cámbialo y usa Vault
+
+# ==== Etiquetas ====
+tags:
+  Env: "Dev"
