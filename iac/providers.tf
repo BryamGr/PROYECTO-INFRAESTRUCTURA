@@ -21,7 +21,6 @@ provider "aws" {
   token      = var.aws_session_token
 
 
-# Certificados para CloudFront deben estar en us-east-1
 provider "aws" {
   alias  = "use1"
   region = "us-east-1"
