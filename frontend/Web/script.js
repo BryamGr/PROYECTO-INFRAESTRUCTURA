@@ -1,6 +1,4 @@
-// Solo funcionalidades del login
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle para mostrar/ocultar contraseña
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     
@@ -13,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         }
 
-        // Validación básica del formulario
     const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
@@ -21,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             
-            // Validación básica (Cognito hará la validación real)
             if (!email || !password) {
                 e.preventDefault();
                 alert('Por favor completa todos los campos');
