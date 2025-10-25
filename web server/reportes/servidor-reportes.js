@@ -4,7 +4,6 @@ const app = express();
 
 app.use(express.json());
 
-// Configuración de la base de datos
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -17,7 +16,6 @@ async function getConnection() {
     return await mysql.createConnection(dbConfig);
 }
 
-// Endpoint para reportes de productos caducados
 app.get('/api/reportes/caducados', async (req, res) => {
     try {
         const connection = await getConnection();
@@ -38,7 +36,6 @@ app.get('/api/reportes/caducados', async (req, res) => {
     }
 });
 
-// Endpoint para reportes de productos sin stock
 app.get('/api/reportes/sin-stock', async (req, res) => {
     try {
         const connection = await getConnection();
@@ -59,23 +56,18 @@ app.get('/api/reportes/sin-stock', async (req, res) => {
     }
 });
 
-// Endpoint para métricas del dashboard
 app.get('/api/reportes/metricas', async (req, res) => {
     try {
         const connection = await getConnection();
         
-        // Obtener total de productos
         const [totalProductos] = await connection.execute('SELECT COUNT(*) as total FROM productos');
         
-        // Obtener valor total del inventario
         const [valorInventario] = await connection.execute('SELECT SUM(precio * stock) as valor FROM productos');
         
-        // Obtener productos próximos a vencer (próximos 30 días)
         const [proximosVencer] = await connection.execute(
             'SELECT COUNT(*) as total FROM productos WHERE fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)'
         );
         
-        // Obtener productos por categoría
         const [categorias] = await connection.execute(
             'SELECT categoria, COUNT(*) as cantidad FROM productos GROUP BY categoria'
         );
@@ -100,7 +92,6 @@ app.get('/api/reportes/metricas', async (req, res) => {
     }
 });
 
-// Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', service: 'reportes' });
 });
