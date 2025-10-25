@@ -4,7 +4,6 @@ const app = express();
 
 app.use(express.json());
 
-// Configuración de la base de datos
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -13,12 +12,10 @@ const dbConfig = {
     port: process.env.DB_PORT || 3306
 };
 
-// Conexión a la base de datos
 async function getConnection() {
     return await mysql.createConnection(dbConfig);
 }
 
-// Endpoint para obtener todos los productos
 app.get('/api/productos', async (req, res) => {
     try {
         const connection = await getConnection();
@@ -38,7 +35,6 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
-// Endpoint para agregar nuevo producto
 app.post('/api/productos', async (req, res) => {
     try {
         const { nombre, categoria, precio, stock, fecha_caducidad } = req.body;
@@ -65,7 +61,6 @@ app.post('/api/productos', async (req, res) => {
     }
 });
 
-// Endpoint para actualizar producto
 app.put('/api/productos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -99,7 +94,6 @@ app.put('/api/productos/:id', async (req, res) => {
     }
 });
 
-// Endpoint para eliminar producto
 app.delete('/api/productos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -132,7 +126,6 @@ app.delete('/api/productos/:id', async (req, res) => {
     }
 });
 
-// Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', service: 'inventario' });
 });
