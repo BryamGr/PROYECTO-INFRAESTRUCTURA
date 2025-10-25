@@ -102,7 +102,6 @@ body {
     z-index: 1;
 }
 
-/* Contenedor del login */
 .login-container {
     flex: 1;
     background: white;
@@ -129,7 +128,6 @@ body {
     font-size: 14px;
 }
 
-/* Grupos de entrada */
 .input-group {
     margin-bottom: 20px;
 }
@@ -219,7 +217,6 @@ body {
     min-height: 18px;
 }
 
-/* Opciones */
 .options {
     display: flex;
     justify-content: space-between;
@@ -275,7 +272,6 @@ body {
     text-decoration: underline;
 }
 
-/* Botón */
 .btn {
     width: 100%;
     padding: 15px;
@@ -391,7 +387,6 @@ body {
     }
 }
 
-    /* ===== Modal nueva contraseña ===== */
     .modal-overlay {
     position: fixed;
     inset: 0;
@@ -453,7 +448,6 @@ body {
     margin-top: 10px;
     }
 
-    /* Secondary button */
     .btn.btn-secondary {
     background: #e9eef3;
     color: var(--text-dark);
@@ -464,9 +458,7 @@ body {
     transform: none;
     }
 
-    /* El modal NUNCA debe mostrarse si está oculto */
 .modal-overlay[hidden] { display: none !important; }
 
-/* Usaremos la clase .show para abrirlo explícitamente */
-.modal-overlay { display: none; }          /* estado base cerrado */
-.modal-overlay.show { display: flex; }     /* abierto */
+.modal-overlay { display: none; }         
+.modal-overlay.show { display: flex; }   
