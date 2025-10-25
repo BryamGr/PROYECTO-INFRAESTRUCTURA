@@ -90,23 +90,18 @@
           aws_session_token: "{{ aws_session_token | default(omit) }}"
 
           project_name: "{{ project_name }}"
-
-          # Frontend / DNS (templates pasan tal cual; si están vacíos, el plan puede fallar)
           domain_name: "{{ domain_name }}"
           hosted_zone_id: "{{ hosted_zone_id }}"
           waf_enable: "{{ waf_enable }}"
 
-          # Buckets
           frontend_bucket_name: "{{ frontend_bucket_name }}"
           uploads_bucket_name: "{{ uploads_bucket_name }}"
 
-          # ECR / Imágenes recién subidas
           ecr_repo_prefix: "{{ ecr_repo_prefix }}"
           auth_image: "{{ auth_image }}"
           inventario_image: "{{ inventario_image }}"
           reportes_image: "{{ reportes_image }}"
 
-          # DB (MySQL)
           db_engine: "{{ db_engine }}"
           db_engine_version: "{{ db_engine_version }}"
           db_instance_class: "{{ db_instance_class }}"
@@ -114,7 +109,6 @@
           db_username: "{{ db_username }}"
           db_password: "{{ db_password }}"
 
-          # Puertos / escala
           inventario_port: "{{ inventario_port }}"
           reportes_port: "{{ reportes_port }}"
           auth_port: "{{ auth_port }}"
@@ -122,7 +116,6 @@
           desired_count_inventario: "{{ desired_count_inventario }}"
           desired_count_reportes: "{{ desired_count_reportes }}"
 
-          # Red / API / JWT
           enable_nat_gateway: "{{ enable_nat_gateway }}"
           api_stage_name: "{{ api_stage_name }}"
           jwt_secret: "{{ jwt_secret }}"
@@ -132,7 +125,6 @@
       community.general.terraform:
         project_path: "{{ playbook_dir }}/.."
         state: present
-    # ---------- Publicación de frontends a S3 ----------
     - name: Subir Dashboard a S3
       when: enable_frontend | default(false)
       command: >
@@ -149,7 +141,6 @@
         --delete
       changed_when: false
 
-    # Invalidación de CloudFront (solo HTML de entrada)
     - name: Obtener ID de la distribución de CloudFront (si existe)
       when: enable_frontend | default(false)
       shell: terraform output -raw cloudfront_distribution_id
