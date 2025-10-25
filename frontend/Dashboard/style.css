@@ -45,7 +45,6 @@
     margin: 0 auto;
     }
 
-    /* NUEVO: contenedor para los dos botones del header */
     .header-actions {
     display: flex;
     gap: 0.5rem;
@@ -67,7 +66,6 @@
     color: var(--gray);
     }
 
-    /* Botones */
     .btn-primary {
     background: var(--primary);
     color: var(--white);
@@ -170,14 +168,12 @@
     color: var(--gray);
     }
 
-    /* Main content */
     main {
     max-width: 1400px;
     margin: 0 auto;
     padding: 1rem;
     }
 
-    /* Cards */
     .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -239,7 +235,6 @@
     color: var(--white);
     }
 
-    /* Charts */
     .charts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -277,7 +272,6 @@
     max-height: 280px;
     }
 
-    /* Table section */
     .table-section {
     background: var(--white);
     border-radius: var(--border-radius);
@@ -348,7 +342,6 @@
     border-color: var(--primary);
     }
 
-    /* Tabla */
     .table-container {
     overflow-x: auto;
     border-radius: var(--border-radius);
@@ -391,12 +384,10 @@
 
     td.actions { display: flex; gap: 0.25rem; }
 
-    /* Estados */
     .expired { color: var(--danger); font-weight: 600; }
     .warning { color: var(--warning); font-weight: 600; }
     .valid { color: var(--success); }
 
-    /* Footer tabla */
     .table-footer {
     display: flex;
     justify-content: space-between;
@@ -408,7 +399,6 @@
     .pagination { display: flex; align-items: center; gap: 1rem; }
     .table-info { color: var(--gray); font-size: 0.9rem; }
 
-    /* Modal base */
     .modal {
     display: none;
     position: fixed;
@@ -467,7 +457,6 @@
     border-top: 1px solid var(--gray-light);
     }
 
-    /* Form */
     .form-group { margin-bottom: 1.5rem; }
     .form-row { display: flex; gap: 1rem; }
     .form-row .form-group { flex: 1; }
@@ -492,7 +481,6 @@
     box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
     }
 
-    /* Toasts */
     .toast {
     position: fixed;
     top: 20px; right: 20px;
@@ -513,7 +501,6 @@
     .toast.error { background: var(--danger); }
     .toast.info { background: var(--info); }
 
-    /* Responsive */
     @media (max-width: 1024px) { .charts { grid-template-columns: 1fr; } }
 
     @media (max-width: 768px) {
