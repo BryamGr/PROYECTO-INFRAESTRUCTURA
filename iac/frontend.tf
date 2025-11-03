@@ -83,41 +83,43 @@ resource "aws_acm_certificate_validation" "cert" {
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
-  count   = var.enable_frontend ? 1 : 0
-  enabled = true
-  price_class = "PriceClass_100"
+  count               = var.enable_frontend ? 1 : 0
+  enabled             = true
+  price_class         = "PriceClass_100"
   default_root_object = "index.html"
 
   # Orígenes
   origins {
     domain_name              = aws_s3_bucket.dashboard.bucket_regional_domain_name
     origin_id                = "s3-dashboard"
-    origin_access_control_id = aws_cloudfront_origin_access_control.oac_dashboard[0].id
+    origin_access_control_id = aws_cloudfront_origin_access_control.oac_dashboard[count.index].id
   }
   origins {
     domain_name              = aws_s3_bucket.auth_spa.bucket_regional_domain_name
     origin_id                = "s3-auth"
-    origin_access_control_id = aws_cloudfront_origin_access_control.oac_auth[0].id
+    origin_access_control_id = aws_cloudfront_origin_access_control.oac_auth[count.index].id
   }
 
 
   default_cache_behavior {
     target_origin_id       = "s3-dashboard"
-    viewer_protocol_policy = "redirect-to-HTTPS"
-    allowed_methods        = ["GET","HEAD","OPTIONS"]
-    cached_methods         = ["GET","HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
     compress               = true
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized
   }
   ordered_cache_behavior {
     path_pattern           = "/auth/*"
     target_origin_id       = "s3-auth"
-    viewer_protocol_policy = "redirect-to-HTTPS"
-    allowed_methods        = ["GET","HEAD","OPTIONS"]
-    cached_methods         = ["GET","HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
     compress               = true
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
- 
+
   custom_error_response {
     error_code            = 403
     response_code         = 200
@@ -130,13 +132,19 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn              = var.domain_name != "" ? aws_acm_certificate_validation.cert[0].certificate_arn : null
+    acm_certificate_arn              = try(aws_acm_certificate_validation.cert[0].certificate_arn, null)
     ssl_support_method               = var.domain_name != "" ? "sni-only" : null
     minimum_protocol_version         = var.domain_name != "" ? "TLSv1.2_2021" : null
     cloudfront_default_certificate   = var.domain_name == ""
   }
 
-  web_acl_id = var.waf_enable ? aws_wafv2_web_acl.cf[0].arn : null
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  web_acl_id = var.enable_frontend && var.waf_enable ? aws_wafv2_web_acl.cf[0].arn : null
 
   tags = merge(var.tags, { Name = "${var.project_name}-cdn" })
 }
@@ -151,14 +159,14 @@ data "aws_iam_policy_document" "dash_oac" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.cdn[0].arn]
+      values   = [aws_cloudfront_distribution.cdn[count.index].arn]
     }
   }
 }
 resource "aws_s3_bucket_policy" "dashboard" {
   count      = var.enable_frontend ? 1 : 0
   bucket     = aws_s3_bucket.dashboard.id
-  policy     = data.aws_iam_policy_document.dash_oac[0].json
+  policy     = data.aws_iam_policy_document.dash_oac[count.index].json
   depends_on = [aws_cloudfront_distribution.cdn]
 }
 
@@ -171,14 +179,14 @@ data "aws_iam_policy_document" "auth_oac" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.cdn[0].arn]
+      values   = [aws_cloudfront_distribution.cdn[count.index].arn]
     }
   }
 }
 resource "aws_s3_bucket_policy" "auth" {
   count      = var.enable_frontend ? 1 : 0
   bucket     = aws_s3_bucket.auth_spa.id
-  policy     = data.aws_iam_policy_document.auth_oac[0].json
+  policy     = data.aws_iam_policy_document.auth_oac[count.index].json
   depends_on = [aws_cloudfront_distribution.cdn]
 }
 
@@ -219,8 +227,8 @@ resource "aws_route53_record" "frontend" {
   name    = var.domain_name
   type    = "A"
   alias {
-    name                   = aws_cloudfront_distribution.cdn[0].domain_name
-    zone_id                = aws_cloudfront_distribution.cdn[0].hosted_zone_id
+    name                   = aws_cloudfront_distribution.cdn[count.index].domain_name
+    zone_id                = aws_cloudfront_distribution.cdn[count.index].hosted_zone_id
     evaluate_target_health = false
   }
 }

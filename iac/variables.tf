@@ -1,11 +1,51 @@
 variable "project_name" { type = string, description = "Prefijo de recursos" }
 variable "aws_region"   { type = string, description = "Región AWS" }
+variable "aws_profile"  { type = string, default = null, description = "Perfil local opcional" }
+variable "aws_access_key_id" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "Access key opcional cuando no se usa perfil"
+}
+variable "aws_secret_access_key" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "Secret key opcional cuando no se usa perfil"
+}
+variable "aws_session_token" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "Session token opcional para credenciales temporales"
+}
+variable "assume_role_arn" {
+  type        = string
+  default     = null
+  description = "ARN de role a asumir (cross-account)"
+}
+variable "assume_role_external_id" {
+  type        = string
+  default     = null
+  description = "External ID usado al asumir role"
+}
 
-variable "domain_name"    { type = string, description = "Dominio/subdominio para frontend" }
-variable "hosted_zone_id" { type = string, description = "Hosted Zone ID de Route53" }
+variable "domain_name" {
+  type        = string
+  default     = ""
+  description = "Dominio/subdominio para frontend"
+}
+variable "hosted_zone_id" {
+  type        = string
+  default     = ""
+  description = "Hosted Zone ID de Route53"
+}
 
-variable "frontend_bucket_name" { type = string }
-variable "uploads_bucket_name"  { type = string }
+variable "enable_frontend" { type = bool, default = true }
+
+variable "frontend_bucket_name"      { type = string }
+variable "auth_frontend_bucket_name" { type = string }
+variable "uploads_bucket_name"       { type = string }
 
 # VPC
 variable "vpc_cidr" { type = string, default = "10.20.0.0/16" }
