@@ -345,6 +345,12 @@ resource "aws_sqs_queue" "events" {
   tags = var.tags
 }
 
+data "archive_file" "notifier" {
+  type        = "zip"
+  source_dir  = "${path.module}/lambda_src"
+  output_path = "${path.module}/lambda/notifier.zip"
+}
+
 resource "aws_iam_role" "lambda" {
   name = "${var.project_name}-lambda-role"
   assume_role_policy = jsonencode({
@@ -360,7 +366,8 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 resource "aws_lambda_function" "notifier" {
   function_name = "${var.project_name}-notifier"
   role          = aws_iam_role.lambda.arn
-  filename      = var.lambda_zip_path
+  filename      = data.archive_file.notifier.output_path
+  source_code_hash = data.archive_file.notifier.output_base64sha256
   handler       = "index.handler"
   runtime       = "nodejs20.x"
   timeout       = 10

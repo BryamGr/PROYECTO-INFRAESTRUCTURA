@@ -1,5 +1,5 @@
 variable "project_name" { type = string, description = "Prefijo de recursos" }
-variable "aws_region"   { type = string, description = "Región AWS" }
+variable "aws_region"   { type = string, description = "Región AWS", default = "us-east-1" }
 variable "aws_profile"  { type = string, default = null, description = "Perfil local opcional" }
 variable "aws_access_key_id" {
   type        = string
@@ -83,7 +83,6 @@ variable "db_password"       { type = string, sensitive = true }
 # Otros
 variable "waf_enable"     { type = bool, default = true }
 variable "api_stage_name" { type = string, default = "prod" }
-variable "lambda_zip_path" { type = string, default = "./lambda/notifier.zip" }
 variable "jwt_secret"     { type = string, default = "", sensitive = true }
 
 variable "tags" {
