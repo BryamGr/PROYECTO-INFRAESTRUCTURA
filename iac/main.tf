@@ -54,7 +54,7 @@ resource "aws_lb" "internal" {
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = [for s in aws_subnet.private : s.id]
+  subnets            = [for s in values(aws_subnet.private) : s.id]
   tags               = var.tags
 }
 
@@ -233,7 +233,7 @@ resource "aws_ecs_service" "inventario" {
   task_definition = aws_ecs_task_definition.inventario.arn
   desired_count   = var.desired_count_inventario
   launch_type     = "FARGATE"
-  network_configuration { subnets = [for s in aws_subnet.private : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
+  network_configuration { subnets = [for s in values(aws_subnet.private) : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
   load_balancer { target_group_arn = aws_lb_target_group.inventario.arn, container_name = "inventario", container_port = var.inventario_port }
   depends_on = [aws_lb_listener.http]
   tags       = var.tags
@@ -245,7 +245,7 @@ resource "aws_ecs_service" "reportes" {
   task_definition = aws_ecs_task_definition.reportes.arn
   desired_count   = var.desired_count_reportes
   launch_type     = "FARGATE"
-  network_configuration { subnets = [for s in aws_subnet.private : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
+  network_configuration { subnets = [for s in values(aws_subnet.private) : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
   load_balancer { target_group_arn = aws_lb_target_group.reportes.arn, container_name = "reportes", container_port = var.reportes_port }
   depends_on = [aws_lb_listener.http]
   tags       = var.tags
@@ -257,7 +257,7 @@ resource "aws_ecs_service" "auth" {
   task_definition = aws_ecs_task_definition.auth.arn
   desired_count   = var.desired_count_auth
   launch_type     = "FARGATE"
-  network_configuration { subnets = [for s in aws_subnet.private : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
+  network_configuration { subnets = [for s in values(aws_subnet.private) : s.id], security_groups = [aws_security_group.ecs_tasks.id] }
   load_balancer { target_group_arn = aws_lb_target_group.auth.arn, container_name = "auth", container_port = var.auth_port }
   depends_on = [aws_lb_listener.http]
   tags       = var.tags
@@ -272,7 +272,7 @@ resource "aws_apigatewayv2_api" "api" {
 resource "aws_apigatewayv2_vpc_link" "link" {
   name               = "${var.project_name}-vpc-link"
   security_group_ids = [aws_security_group.vpc_link.id]
-  subnet_ids         = [for s in aws_subnet.private : s.id]
+  subnet_ids         = [for s in values(aws_subnet.private) : s.id]
   tags               = var.tags
 }
 resource "aws_apigatewayv2_integration" "alb" {
@@ -299,7 +299,7 @@ resource "aws_apigatewayv2_stage" "stage" {
 # RDS MySQL
 resource "aws_db_subnet_group" "db" {
   name       = "${var.project_name}-db-subnets"
-  subnet_ids = [for s in aws_subnet.private : s.id]
+  subnet_ids = [for s in values(aws_subnet.private) : s.id]
   tags       = var.tags
 }
 resource "aws_security_group" "db" {
