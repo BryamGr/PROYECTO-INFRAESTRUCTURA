@@ -30,8 +30,16 @@ variable "assume_role_external_id" {
   description = "External ID usado al asumir role"
 }
 
-variable "domain_name"    { type = string, description = "Dominio/subdominio para frontend" }
-variable "hosted_zone_id" { type = string, description = "Hosted Zone ID de Route53" }
+variable "domain_name" {
+  type        = string
+  default     = ""
+  description = "Dominio/subdominio para frontend"
+}
+variable "hosted_zone_id" {
+  type        = string
+  default     = ""
+  description = "Hosted Zone ID de Route53"
+}
 
 variable "enable_frontend" { type = bool, default = true }
 
