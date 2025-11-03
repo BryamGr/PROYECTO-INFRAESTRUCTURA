@@ -5,14 +5,6 @@ terraform {
   }
 }
 
-variable "aws_region" { type = string }
-variable "aws_profile" { type = string, default = null }
-variable "aws_access_key_id" { type = string, default = null, sensitive = true }
-variable "aws_secret_access_key" { type = string, default = null, sensitive = true }
-variable "aws_session_token" { type = string, default = null, sensitive = true }
-variable "assume_role_arn" { type = string, default = null }
-variable "assume_role_external_id" { type = string, default = null }
-
 provider "aws" {
   region     = var.aws_region
   profile    = var.aws_profile
@@ -20,8 +12,31 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
   token      = var.aws_session_token
 
+  dynamic "assume_role" {
+    for_each = var.assume_role_arn != null ? [var.assume_role_arn] : []
+    content {
+      role_arn     = assume_role.value
+      session_name = "${var.project_name}-terraform"
+      external_id  = var.assume_role_external_id
+    }
+  }
+}
+
 
 provider "aws" {
   alias  = "use1"
   region = "us-east-1"
+  profile    = var.aws_profile
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
+  token      = var.aws_session_token
+
+  dynamic "assume_role" {
+    for_each = var.assume_role_arn != null ? [var.assume_role_arn] : []
+    content {
+      role_arn     = assume_role.value
+      session_name = "${var.project_name}-terraform"
+      external_id  = var.assume_role_external_id
+    }
+  }
 }
