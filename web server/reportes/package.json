@@ -1,0 +1,17 @@
+{
+"name": "servidor-reportes",
+  "version": "1.0.0",
+  "description": "Servidor web para reportes de inventario",
+  "main": "servidor-reportes.js",
+  "scripts": {
+    "start": "node servidor-reportes.js",
+    "dev": "node servidor-reportes.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0"
+  },
+  "keywords": ["reportes", "api", "nodejs"],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}

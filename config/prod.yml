@@ -1,0 +1,39 @@
+
+aws_profile: "default"
+aws_region: "<us-east-1>"  
+tf_state_bucket: inventario
+tf_state_key: infra/terraform.tfstate 
+
+project_name: inventario
+domain_name: "<REPLACE_ME_DOMAIN_NAME_OR_EMPTY>"
+hosted_zone_id: "<REPLACE_ME_HOSTED_ZONE_ID_OR_EMPTY>"
+waf_enable: true
+frontend_bucket_name: inventario
+uploads_bucket_name: inventario
+
+ecr_repo_prefix: inventario-panel
+auth_context_dir: ".../web_server/auth"
+inventario_context_dir: ".../web_server/inventario"
+reportes_context_dir: ".../web_server/reportes"
+image_tag: "v1.0"
+
+db_engine: "mysql"
+db_engine_version: "8.0"
+db_instance_class: "db.t4g.micro"
+db_name: "inventario"
+db_username: "root"         
+db_password: "password"    
+
+inventario_port: 3000
+reportes_port: 3001
+auth_port: 3002
+desired_count_auth: 1
+desired_count_inventario: 1
+desired_count_reportes: 1
+
+enable_nat_gateway: true
+api_stage_name: "prod"
+
+jwt_secret: "123456789"    
+tags:
+  Env: "Dev"
