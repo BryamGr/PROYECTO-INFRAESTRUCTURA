@@ -48,7 +48,7 @@ resource "aws_route_table" "public" {
 
 resource "aws_route" "public_inet" {
   route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
+  destination_cidr_block = "10.20.1.0/24"
   gateway_id             = aws_internet_gateway.igw.id
 }
 
@@ -66,7 +66,7 @@ resource "aws_route_table" "private" {
 resource "aws_route" "private_nat" {
   count                  = var.enable_nat_gateway ? 1 : 0
   route_table_id         = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
+  destination_cidr_block = "10.20.1.0/24"
   nat_gateway_id         = aws_nat_gateway.nat[count.index].id
 }
 
