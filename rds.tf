@@ -33,8 +33,8 @@ resource "aws_db_instance" "db" {
   engine                     = var.db_engine
   engine_version             = var.db_engine_version
   instance_class             = var.db_instance_class
-  username                   = var.db_username
-  password                   = var.db_password
+  username                   = envasados
+  password                   = envasados321
   allocated_storage          = 20
   storage_encrypted          = true
   publicly_accessible        = false
@@ -117,37 +117,13 @@ resource "aws_db_proxy" "proxy" {
   auth {
     auth_scheme = "SECRETS"
     iam_auth    = "DISABLED"
-    secret_arn  = "*" # Terraform no puede obtener el SecretARN de una BD creada por él.
-                      # Debes crear un Secret en Secrets Manager e ingresar el ARN aquí.
-                      # O, más fácil, si usas la contraseña:
+    secret_arn  ="arn:aws:secretsmanager:us-east-1:481207241117:secret:envasados_secret-ZYBknc"
     # auth_scheme = "NATIVE"
   }
   
   tags = var.tags
 
-  # Workaround para un bug común de Terraform donde el proxy
-  # no puede obtener el SecretARN de la BD que acaba de crear.
-  # Esta es la forma más simple de manejar la autenticación
-  # basada en contraseña nativa que tus apps esperan.
-  # Desafortunadamente, AWS requiere que el *password* esté en Secrets Manager.
-  # Para este proyecto, la solución más simple será usar el password nativo
-  # y referenciar un Secret de Secrets Manager que DEBES crear manualmente
-  # con el usuario y contraseña de la BD.
-  #
-  # Para simplificar y que funcione (aunque menos seguro):
-  # auth {
-  #   auth_scheme = "NATIVE"
-  #   iam_auth    = "DISABLED"
-  # }
-  # Y tus apps se conectan con el usuario/pass de la BD.
-  #
-  # **POR AHORA, usaremos un truco:** el proxy heredará la autenticación
-  # de la BD, pero esto requiere que tus apps usen IAM Auth.
-  #
-  # **¡MEJOR SOLUCIÓN (la que implementaré)!:**
-  # Usaremos NATIVE auth. El `auth` de arriba es complejo.
-  # Lo quitaremos y dejaremos que tus apps se autentiquen
-  # en el proxy tal como lo harían en la BD (con user/pass).
+
 }
 
 # --- Target Group del Proxy ---
