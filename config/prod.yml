@@ -1,18 +1,13 @@
 aws_profile: "default"
-aws_region: "us-east-1" # <-- CORREGIDO: Sin "<>"
-
-# Configuración del Backend de Terraform
-# ¡Asegúrate de que este bucket S3 'inventario-tfstate-rf2411' exista!
+aws_region: "us-east-1" 
 tf_state_bucket: "inventario-tfstate-rf2411" 
 tf_state_key: "infra/terraform.tfstate"
 
-# --- Configuración General del Proyecto ---
 project_name: "inventario"
-domain_name: "" # <-- CORREGIDO: Dejar vacío si no se usa
-hosted_zone_id: "" # <-- CORREGIDO: Dejar vacío si no se usa
+domain_name: "" 
+hosted_zone_id: "" 
 waf_enable: true
 
-# --- Buckets S3 (¡Deben ser únicos globalmente!) ---
 frontend_bucket_name: "inventario-frontend-rf2411-prod" # <-- CORREGIDO: Nombre único
 auth_frontend_bucket_name: "inventario-auth-rf2411-prod" # <-- AÑADIDO: Faltaba este bucket
 uploads_bucket_name: "inventario-uploads-rf2411-prod" # <-- CORREGIDO: Nombre único
@@ -30,11 +25,9 @@ db_engine: "mysql"
 db_engine_version: "8.0"
 db_instance_class: "db.t4g.micro"
 db_name: "inventario"
-# ¡CORREGIDO: No uses 'root'/'password' en producción!
 db_username: "admin_inventario" 
 db_password: "<REEMPLAZAR_CON_CONTRASENA_SEGURA_DE_BD>" 
 
-# --- Configuración de ECS ---
 inventario_port: 3000
 reportes_port: 3001
 auth_port: 3002
@@ -42,14 +35,12 @@ desired_count_auth: 1
 desired_count_inventario: 1
 desired_count_reportes: 1
 
-# --- Configuración de Red y API ---
 enable_nat_gateway: true
 api_stage_name: "prod"
 
 # --- Secretos ---
-jwt_secret: "<REEMPLAZAR_CON_SECRETO_JWT_LARGO_Y_ALEATORIO>" # <-- CORREGIDO
+jwt_secret: "<REEMPLAZAR_CON_SECRETO_JWT_LARGO_Y_ALEATORIO>" 
 
-# --- Tags ---
 tags:
   Env: "Dev"
   Project: "Inventario"
