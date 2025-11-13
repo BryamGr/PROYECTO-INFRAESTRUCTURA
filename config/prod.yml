@@ -8,25 +8,22 @@ domain_name: ""
 hosted_zone_id: "" 
 waf_enable: true
 
-frontend_bucket_name: "inventario-frontend-rf2411-prod" # <-- CORREGIDO: Nombre único
-auth_frontend_bucket_name: "inventario-auth-rf2411-prod" # <-- AÑADIDO: Faltaba este bucket
-uploads_bucket_name: "inventario-uploads-rf2411-prod" # <-- CORREGIDO: Nombre único
+frontend_bucket_name: "inventario-frontend-rf2411-prod" 
+auth_frontend_bucket_name: "inventario-auth-rf2411-prod" 
+uploads_bucket_name: "inventario-uploads-rf2411-prod" 
 
-# --- Configuración de Build de Docker ---
 ecr_repo_prefix: "inventario-panel"
-# CORREGIDO: Rutas relativas desde el playbook (asumiendo que el playbook está en 'ansible/playbook.yml')
 auth_context_dir: "../web_server/auth"
 inventario_context_dir: "../web_server/inventario"
 reportes_context_dir: "../web_server/reportes"
 image_tag: "v1.0"
 
-# --- Configuración de la Base de Datos ---
 db_engine: "mysql"
 db_engine_version: "8.0"
 db_instance_class: "db.t4g.micro"
 db_name: "inventario"
 db_username: "admin_inventario" 
-db_password: "<REEMPLAZAR_CON_CONTRASENA_SEGURA_DE_BD>" 
+db_password: "1584Ro190" 
 
 inventario_port: 3000
 reportes_port: 3001
@@ -38,8 +35,7 @@ desired_count_reportes: 1
 enable_nat_gateway: true
 api_stage_name: "prod"
 
-# --- Secretos ---
-jwt_secret: "<REEMPLAZAR_CON_SECRETO_JWT_LARGO_Y_ALEATORIO>" 
+jwt_secret: "aB72/kLp3+O9sZJdG8rFmN4cK5jP6tQ8vW1xY2z" 
 
 tags:
   Env: "Dev"
