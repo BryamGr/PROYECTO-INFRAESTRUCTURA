@@ -1,8 +1,8 @@
----
 collections:
-  - name: amazon.aws
-    version: ">=6.0.0"
-  - name: community.docker
-    version: ">=3.4.0"
+  - name: amazon.aws 
+    version: ">=10.1.0"
   - name: community.general
-    version: ">=7.0.0"
+  - name: community.docker
+  - name: amazon.cloud 
+    version: ">=0.4.0"
+    
