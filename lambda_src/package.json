@@ -1,0 +1,15 @@
+{
+  "name": "lambda-notificador-inventario",
+  "version": "1.0.0",
+  "description": "Lambda para procesar alertas de inventario desde SQS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.583.0",
+    "mysql2": "^3.9.7"
+  }
+}
