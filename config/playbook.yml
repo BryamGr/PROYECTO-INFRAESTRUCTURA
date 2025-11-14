@@ -4,16 +4,10 @@
   vars_files:
     - envs/prod.yml
 
-  environment:
-    AWS_ACCESS_KEY_ID: "{{ aws_access_key_id | default(omit) }}"
-    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key | default(omit) }}"
-    AWS_SESSION_TOKEN: "{{ aws_session_token | default(omit) }}"
-    AWS_PROFILE: "{{ aws_profile | default(omit) }}"
-    AWS_DEFAULT_REGION: "{{ aws_region }}"
-
   pre_tasks:
     - name: Requisitos de colecciones
-      debug: { msg: "Ejecuta: ansible-galaxy collection install -r ansible/requirements.yml" }
+      debug:
+        msg: "Ejecuta: ansible-galaxy collection install -r config/requirements.yml"
 
     - name: Validar variables mínimas
       assert:
@@ -28,52 +22,116 @@
           - reportes_context_dir | length > 0
 
   tasks:
-    - name: Crear repos ECR (idempotente)
-      amazon.aws.ecr_repository:
-        name: "{{ ecr_repo_prefix }}/{{ item }}"
-        image_tag_mutability: MUTABLE
-        image_scanning_configuration: { scanOnPush: true }
-      loop: [ "auth", "inventario", "reportes" ]
-      register: ecr_repos
+    - name: Obtener ID de la cuenta AWS 
+      command: aws sts get-caller-identity --query Account --output text
+      register: aws_caller
+      changed_when: false
 
-    - name: Obtener URIs de repos
+    - name: Guardar ID de cuenta AWS en fact
       set_fact:
-        ecr_auth_uri: "{{ (ecr_repos.results | selectattr('item','equalto','auth') | first).repository.repositoryUri }}"
-        ecr_inv_uri:  "{{ (ecr_repos.results | selectattr('item','equalto','inventario') | first).repository.repositoryUri }}"
-        ecr_rep_uri:  "{{ (ecr_repos.results | selectattr('item','equalto','reportes') | first).repository.repositoryUri }}"
+        aws_account_id: "{{ aws_caller.stdout | trim }}"
 
-    - name: Login a ECR
-      amazon.aws.ecr_login:
-        region: "{{ aws_region }}"
+    - name: Construir URIs de repos ECR
+      set_fact:
+        ecr_auth_uri: "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/{{ ecr_repo_prefix }}/auth"
+        ecr_inv_uri:  "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/{{ ecr_repo_prefix }}/inventario"
+        ecr_rep_uri:  "{{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com/{{ ecr_repo_prefix }}/reportes"
 
-    - name: Build & Push AUTH
-      community.docker.docker_image:
-        name: "{{ ecr_auth_uri }}"
-        tag: "{{ image_tag }}"
-        push: true
-        build: { path: "{{ auth_context_dir }}", dockerfile: Dockerfile }
+    - name: Crear repos ECR si no existen (auth, inventario, reportes)
+      become: true
+      shell: |
+        aws ecr describe-repositories \
+          --repository-names {{ ecr_repo_prefix }}/{{ item }} \
+          --region {{ aws_region }} >/dev/null 2>&1 \
+        || aws ecr create-repository \
+          --repository-name {{ ecr_repo_prefix }}/{{ item }} \
+          --region {{ aws_region }} \
+          --image-tag-mutability MUTABLE \
+          --image-scanning-configuration scanOnPush=true >/dev/null
+      loop:
+        - auth
+        - inventario
+        - reportes
+      register: ecr_create
+      changed_when: ecr_create.rc == 0
 
-    - name: Build & Push INVENTARIO
-      community.docker.docker_image:
-        name: "{{ ecr_inv_uri }}"
-        tag: "{{ image_tag }}"
-        push: true
-        build: { path: "{{ inventario_context_dir }}", dockerfile: Dockerfile }
+    - name: Login a ECR usando CLI de Docker
+      become: true
+      shell: |
+        aws ecr get-login-password --region {{ aws_region }} \
+        | docker login --username AWS --password-stdin {{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com
+      register: ecr_login
+      changed_when: "'Login Succeeded' in ecr_login.stdout"
 
-    - name: Build & Push REPORTES
-      community.docker.docker_image:
-        name: "{{ ecr_rep_uri }}"
-        tag: "{{ image_tag }}"
-        push: true
-        build: { path: "{{ reportes_context_dir }}", dockerfile: Dockerfile }
+    - name: Build imagen AUTH
+      become: true
+      command: docker build -t {{ ecr_auth_uri }}:{{ image_tag | default('latest') }} -f Dockerfile .
+      args:
+        chdir: "{{ auth_context_dir }}"
+
+    - name: Push imagen AUTH
+      become: true
+      command: docker push {{ ecr_auth_uri }}:{{ image_tag | default('latest') }}
+
+    - name: Build imagen INVENTARIO
+      become: true
+      command: docker build -t {{ ecr_inv_uri }}:{{ image_tag | default('latest') }} -f Dockerfile .
+      args:
+        chdir: "{{ inventario_context_dir }}"
+
+    - name: Push imagen INVENTARIO
+      become: true
+      command: docker push {{ ecr_inv_uri }}:{{ image_tag | default('latest') }}
+
+    - name: Build imagen REPORTES
+      become: true
+      command: docker build -t {{ ecr_rep_uri }}:{{ image_tag | default('latest') }} -f Dockerfile .
+      args:
+        chdir: "{{ reportes_context_dir }}"
+
+    - name: Push imagen REPORTES
+      become: true
+      command: docker push {{ ecr_rep_uri }}:{{ image_tag | default('latest') }}
 
     - name: Definir imágenes para Terraform
       set_fact:
-        auth_image: "{{ ecr_auth_uri }}:{{ image_tag }}"
-        inventario_image: "{{ ecr_inv_uri }}:{{ image_tag }}"
-        reportes_image: "{{ ecr_rep_uri }}:{{ image_tag }}"
+        auth_image: "{{ ecr_auth_uri }}:{{ image_tag | default('latest') }}"
+        inventario_image: "{{ ecr_inv_uri }}:{{ image_tag | default('latest') }}"
+        reportes_image: "{{ ecr_rep_uri }}:{{ image_tag | default('latest') }}"
 
-    - name: Terraform init con backend S3 (sin DynamoDB)
+    - name: Instalar dependencias de Lambda 
+      community.general.npm:
+        path: "{{ playbook_dir }}/../lambda_src"
+        production: true
+
+    - name: Crear bucket S3 para el estado remoto (si no existe, vía AWS CLI)
+      become: true
+      shell: |
+
+        BUCKET="{{ tf_state_bucket }}"
+        REGION="{{ tf_state_region | default(aws_region) }}"
+        echo "Usando bucket: $BUCKET en región: $REGION..."
+        if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
+          echo "Bucket ya existe"
+          exit 0
+        fi
+
+        echo "Creando bucket $BUCKET en región $REGION..."
+
+        if [ "$REGION" = "us-east-1" ]; then
+          aws s3api create-bucket \
+            --bucket "$BUCKET" \
+            --region "$REGION"
+        else
+          aws s3api create-bucket \
+            --bucket "$BUCKET" \
+            --region "$REGION" \
+            --create-bucket-configuration LocationConstraint="$REGION"
+        fi
+      register: tf_bucket_result
+      changed_when: "'Creando bucket' in tf_bucket_result.stdout"
+
+    - name: Terraform Init & Apply
       community.general.terraform:
         project_path: "{{ playbook_dir }}/.."
         state: present
@@ -81,20 +139,20 @@
         backend_config:
           bucket: "{{ tf_state_bucket }}"
           key: "{{ tf_state_key }}"
-          region: "{{ aws_region }}"
+
+          region: "{{ tf_state_region | default(aws_region) }}"
         variables:
           aws_region: "{{ aws_region }}"
           aws_profile: "{{ aws_profile | default(omit) }}"
-          aws_access_key_id: "{{ aws_access_key_id | default(omit) }}"
-          aws_secret_access_key: "{{ aws_secret_access_key | default(omit) }}"
-          aws_session_token: "{{ aws_session_token | default(omit) }}"
 
           project_name: "{{ project_name }}"
-          domain_name: "{{ domain_name }}"
-          hosted_zone_id: "{{ hosted_zone_id }}"
+          domain_name: "{{ domain_name | default(omit) }}"
+          hosted_zone_id: "{{ hosted_zone_id | default(omit) }}"
           waf_enable: "{{ waf_enable }}"
+          acm_certificate_arn: "{{ acm_certificate_arn | default(omit) }}"
 
           frontend_bucket_name: "{{ frontend_bucket_name }}"
+          auth_frontend_bucket_name: "{{ auth_frontend_bucket_name }}"
           uploads_bucket_name: "{{ uploads_bucket_name }}"
 
           ecr_repo_prefix: "{{ ecr_repo_prefix }}"
@@ -121,10 +179,9 @@
           jwt_secret: "{{ jwt_secret }}"
           tags: "{{ tags }}"
 
-    - name: Terraform apply
-      community.general.terraform:
-        project_path: "{{ playbook_dir }}/.."
-        state: present
+          azs:
+            - "{{ aws_region }}a"
+            - "{{ aws_region }}b"
     - name: Subir Dashboard a S3
       when: enable_frontend | default(false)
       command: >
