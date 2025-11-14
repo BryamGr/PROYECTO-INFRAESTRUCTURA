@@ -1,28 +1,30 @@
-
 aws_profile: "default"
-aws_region: "<us-east-1>"  
-tf_state_bucket: inventario
-tf_state_key: infra/terraform.tfstate 
+aws_region: "us-east-2" 
+tf_state_bucket: "inventario-tfstate-rf2411" 
+tf_state_key: "infra/terraform.tfstate"
+tf_state_region: "us-east-1"
 
-project_name: inventario
-domain_name: "<REPLACE_ME_DOMAIN_NAME_OR_EMPTY>"
-hosted_zone_id: "<REPLACE_ME_HOSTED_ZONE_ID_OR_EMPTY>"
+project_name: "inventario"
+domain_name: "" 
+hosted_zone_id: "" 
 waf_enable: true
-frontend_bucket_name: inventario
-uploads_bucket_name: inventario
 
-ecr_repo_prefix: inventario-panel
-auth_context_dir: ".../web_server/auth"
-inventario_context_dir: ".../web_server/inventario"
-reportes_context_dir: ".../web_server/reportes"
+frontend_bucket_name: "inventario-frontend-rf2411-prod" 
+auth_frontend_bucket_name: "inventario-auth-rf2411-prod" 
+uploads_bucket_name: "inventario-uploads-rf2411-prod" 
+
+ecr_repo_prefix: "inventario-panel"
+auth_context_dir: "../webserver/auth"
+inventario_context_dir: "../webserver/inventario"
+reportes_context_dir: "../webserver/reportes"
 image_tag: "v1.0"
 
 db_engine: "mysql"
 db_engine_version: "8.0"
 db_instance_class: "db.t4g.micro"
 db_name: "inventario"
-db_username: "root"         
-db_password: "password"    
+db_username: "admin_inventario" 
+db_password: "1584Ro190" 
 
 inventario_port: 3000
 reportes_port: 3001
@@ -34,6 +36,8 @@ desired_count_reportes: 1
 enable_nat_gateway: true
 api_stage_name: "prod"
 
-jwt_secret: "123456789"    
+jwt_secret: "aB72/kLp3+O9sZJdG8rFmN4cK5jP6tQ8vW1xY2z" 
+
 tags:
   Env: "Dev"
+  Project: "Inventario"
