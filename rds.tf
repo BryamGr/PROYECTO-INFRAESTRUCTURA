@@ -112,7 +112,6 @@ resource "aws_db_proxy" "proxy" {
   
   tags = var.tags
 
-
 }
 
 resource "aws_db_proxy_default_target_group" "default" {
