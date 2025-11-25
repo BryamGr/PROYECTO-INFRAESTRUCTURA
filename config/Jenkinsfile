@@ -1,0 +1,58 @@
+pipeline {
+    agent none
+
+    stages {
+        stage('Checkout') {
+            agent { label 'terraform' }  // cualquier agente sirve acá
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Terraform Init & Plan') {
+            agent { label 'terraform' }
+            steps {
+                dir('terraform') {  // AJUSTA esta ruta a la carpeta real de tu código TF
+                    sh 'terraform --version'
+                    sh 'terraform init -input=false'
+                    sh 'terraform plan -input=false'
+                }
+            }
+        }
+
+        stage('Terraform Apply (opcional)') {
+            when {
+                expression { return params.APPLY_TERRAFORM == true }
+            }
+            agent { label 'terraform' }
+            steps {
+                dir('terraform') {
+                    sh 'terraform apply -auto-approve -input=false'
+                }
+            }
+        }
+
+        stage('Ansible Deploy') {
+            agent { label 'ansible' }
+            steps {
+                dir('ansible') {  // AJUSTA esta ruta a donde tengas tus playbooks
+                    sh 'ansible --version'
+                    sh 'ansible-playbook -i inventory playbook.yml'
+                }
+            }
+        }
+    }
+
+    parameters {
+        booleanParam(
+            name: 'APPLY_TERRAFORM',
+            defaultValue: false,
+            description: 'Marcar en true solo cuando quieras aplicar cambios en infraestructura'
+        )
+    }
+
+    options {
+        timestamps()
+        ansiColor('xterm')
+    }
+}
